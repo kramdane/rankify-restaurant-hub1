@@ -20,13 +20,15 @@ const formSchema = z.object({
   category: z.string().min(2, "Category must be at least 2 characters"),
 });
 
+type FormValues = z.infer<typeof formSchema>;
+
 interface MenuFormProps {
   onSubmit: (values: { name: string; description: string; price: number; category: string }) => void;
   onCancel: () => void;
 }
 
 export function MenuForm({ onSubmit, onCancel }: MenuFormProps) {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -36,10 +38,12 @@ export function MenuForm({ onSubmit, onCancel }: MenuFormProps) {
     },
   });
 
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+  const handleSubmit = (values: FormValues) => {
     onSubmit({
-      ...values,
+      name: values.name,
+      description: values.description,
       price: Number(values.price),
+      category: values.category,
     });
     form.reset();
   };
