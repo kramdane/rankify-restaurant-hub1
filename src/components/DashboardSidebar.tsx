@@ -1,4 +1,4 @@
-import { LayoutDashboard, Menu, Star, MessageSquare, LogOut } from "lucide-react";
+import { LayoutDashboard, Menu, Star, MessageSquare, LogOut, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   Sidebar,
@@ -31,6 +31,11 @@ const menuItems = [
     title: "Campaigns",
     icon: MessageSquare,
     url: "/dashboard/campaigns",
+  },
+  {
+    title: "Contacts",
+    icon: Users,
+    url: "/dashboard/contact",
   },
 ];
 
@@ -72,4 +77,4 @@ export function DashboardSidebar() {
       </SidebarContent>
     </Sidebar>
   );
-};
+}
