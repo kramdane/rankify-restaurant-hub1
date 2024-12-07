@@ -56,7 +56,7 @@ const Contact = () => {
   const [selectedContact, setSelectedContact] = useState<typeof contacts[0] | null>(null);
 
   const handleExportCSV = () => {
-    const headers = ["First Name", "Last Name", "Phone", "Email", "Added Date", "Review Count"];
+    const headers = ["First Name", "Last Name", "Phone", "Email", "Added Date", "Review Count", "Average Rating"];
     const csvData = contacts.map((contact) => [
       contact.firstName,
       contact.lastName,
@@ -64,6 +64,7 @@ const Contact = () => {
       contact.email,
       contact.addedDate,
       contact.reviewCount,
+      calculateAverageRating(contact.reviews),
     ]);
 
     const csvContent = [
@@ -111,6 +112,7 @@ const Contact = () => {
                   <TableHead>Email</TableHead>
                   <TableHead>Added Date</TableHead>
                   <TableHead>Reviews</TableHead>
+                  <TableHead>Average Rating</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -128,6 +130,10 @@ const Contact = () => {
                     <TableCell>{contact.email}</TableCell>
                     <TableCell>{new Date(contact.addedDate).toLocaleDateString()}</TableCell>
                     <TableCell>{contact.reviewCount}</TableCell>
+                    <TableCell className="flex items-center gap-1">
+                      {calculateAverageRating(contact.reviews)}
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
