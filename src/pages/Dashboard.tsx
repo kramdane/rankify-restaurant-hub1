@@ -1,6 +1,8 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, MessageSquare, Menu as MenuIcon, TrendingUp } from "lucide-react";
+import { ReviewsChart } from "@/components/ReviewsChart";
+import { RecentReviews } from "@/components/RecentReviews";
 
 const Dashboard = () => {
   const stats = [
@@ -35,14 +37,18 @@ const Dashboard = () => {
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-bold">Welcome back, Restaurant Name</h1>
-          <p className="text-gray-600 mt-2">Here's what's happening with your restaurant</p>
+          <p className="text-gray-600 mt-2">
+            Here's what's happening with your restaurant
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat) => (
             <Card key={stat.title}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {stat.title}
+                </CardTitle>
                 <stat.icon className="h-4 w-4 text-gray-500" />
               </CardHeader>
               <CardContent>
@@ -51,6 +57,11 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <ReviewsChart />
+          <RecentReviews />
         </div>
       </div>
     </DashboardLayout>
