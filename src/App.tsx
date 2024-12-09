@@ -11,6 +11,8 @@ import Menu from "./pages/Menu";
 import Contact from "./pages/Contact";
 import Reviews from "./pages/Reviews";
 import ReviewForm from "./pages/ReviewForm";
+import Campaigns from "./pages/Campaigns";
+import NewCampaign from "./pages/NewCampaign";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,8 @@ const App = () => (
             <Route path="/dashboard/contact" element={<Contact />} />
             <Route path="/dashboard/reviews" element={<Reviews />} />
             <Route path="/review/:restaurantId" element={<ReviewForm />} />
+            <Route path="/dashboard/campaigns" element={<Campaigns />} />
+            <Route path="/dashboard/campaigns/new" element={<NewCampaign />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
