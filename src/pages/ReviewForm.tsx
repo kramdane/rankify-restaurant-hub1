@@ -63,12 +63,12 @@ export default function ReviewForm() {
     }
 
     const formData = new FormData(e.currentTarget);
-    const reviewData: ReviewFormData = {
+    const reviewData = {
       restaurant_id: restaurantId,
       rating,
       reviewer_name: formData.get("reviewer_name") as string,
       email: formData.get("email") as string,
-      phone: formData.get("phone") as string || undefined,
+      phone: formData.get("phone") as string || null,
       comment: formData.get("comment") as string,
       source: 'form'
     };
