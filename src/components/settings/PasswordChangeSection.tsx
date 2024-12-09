@@ -27,11 +27,24 @@ export function PasswordChangeSection() {
 
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({
+      // First verify the current password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: (await supabase.auth.getUser()).data.user?.email || '',
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        toast.error("Current password is incorrect");
+        setIsLoading(false);
+        return;
+      }
+
+      // If current password is correct, proceed with password update
+      const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword
       });
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
       toast.success("Password updated successfully");
       setCurrentPassword("");
