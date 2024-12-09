@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Register = () => {
   const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [formData, setFormData] = useState({
     restaurantName: "",
     email: "",
@@ -20,14 +21,11 @@ const Register = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For MVP, we'll just simulate registration
     if (Object.values(formData).every((field) => field)) {
-      toast.success("Registration successful! Please check your email to verify your account.");
-      navigate("/login");
-    } else {
-      toast.error("Please fill in all fields");
+      await signUp(formData.email, formData.password);
+      // The AuthContext will handle navigation and toast notifications
     }
   };
 
