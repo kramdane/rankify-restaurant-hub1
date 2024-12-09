@@ -20,6 +20,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { SettingsForm } from "@/components/settings/SettingsForm";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { PasswordChangeSection } from "@/components/settings/PasswordChangeSection";
 
 export default function Settings() {
   const { user, loading: authLoading } = useAuth();
@@ -46,9 +47,10 @@ export default function Settings() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="p-6 max-w-4xl mx-auto space-y-6">
         <h1 className="text-3xl font-bold mb-6">Settings</h1>
         <SettingsForm userId={user.id} />
+        <PasswordChangeSection />
       </div>
     </DashboardLayout>
   );
