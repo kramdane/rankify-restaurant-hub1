@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import DashboardLayout from "@/components/DashboardLayout";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { useForm } from "react-hook-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -90,7 +90,6 @@ const NewCampaign = () => {
                         </FormItem>
                       )}
                     />
-                    {/* Contact selection will be implemented here */}
                   </div>
                 </Form>
               </TabsContent>
@@ -110,7 +109,6 @@ const NewCampaign = () => {
                         </FormItem>
                       )}
                     />
-                    {/* Template selection will be implemented here */}
                   </div>
                 </Form>
               </TabsContent>
@@ -118,7 +116,6 @@ const NewCampaign = () => {
               <TabsContent value="preview">
                 <div className="space-y-4">
                   <div className="border rounded-lg p-4">
-                    {/* Preview content will be implemented here */}
                     <p>Campaign Preview</p>
                   </div>
                 </div>
