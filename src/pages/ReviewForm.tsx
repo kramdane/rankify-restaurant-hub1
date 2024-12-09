@@ -6,12 +6,14 @@ import { ReviewSubmissionFeedback } from "@/components/reviews/ReviewSubmissionF
 import { StarRating } from "@/components/StarRating";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function ReviewForm() {
   const { restaurantId } = useParams();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedRating, setSubmittedRating] = useState(0);
   const [rating, setRating] = useState(0);
+  const { toast } = useToast();
 
   const { data: restaurant } = useQuery({
     queryKey: ["restaurant", restaurantId],
@@ -37,18 +39,42 @@ export default function ReviewForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("Form submission started");
+
+    if (!restaurantId) {
+      console.error("Restaurant ID is missing");
+      toast({
+        title: "Error",
+        description: "Restaurant ID is missing",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!rating) {
+      console.log("Rating is required");
+      toast({
+        title: "Error",
+        description: "Please select a rating",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const formData = new FormData(e.currentTarget);
     const reviewerName = formData.get("reviewer_name") as string;
     const email = formData.get("email") as string;
     const phone = formData.get("phone") as string;
     const comment = formData.get("comment") as string;
 
-    if (!restaurantId) {
-      console.error("Restaurant ID is missing");
-      return;
-    }
-
-    console.log("Submitting review for restaurant:", restaurantId);
+    console.log("Submitting review with data:", {
+      restaurantId,
+      rating,
+      reviewerName,
+      email,
+      phone,
+      comment,
+    });
 
     const { error } = await supabase
       .from("reviews")
@@ -64,11 +90,21 @@ export default function ReviewForm() {
 
     if (error) {
       console.error("Error submitting review:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit review. Please try again.",
+        variant: "destructive",
+      });
       return;
     }
 
+    console.log("Review submitted successfully");
     setSubmittedRating(rating);
     setIsSubmitted(true);
+    toast({
+      title: "Success",
+      description: "Your review has been submitted successfully!",
+    });
   };
 
   if (isSubmitted) {
@@ -157,4 +193,4 @@ export default function ReviewForm() {
       </form>
     </div>
   );
-};
+}
