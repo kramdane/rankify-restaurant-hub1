@@ -49,15 +49,13 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
       setMessages([
         {
           role: "assistant",
-          content: `Hello ${restaurant.owner_name}! How can I help you today?`,
+          content: `Hello ${restaurant.owner_name}! I'm your AI assistant. How can I help you today?`,
         },
       ]);
     }
   }, [restaurant?.owner_name]);
 
-  const processQuestion = async (question: string) => {
-    if (!reviews) return "I don't have access to your review data at the moment.";
-
+  const processSpecialCommands = async (question: string) => {
     const questionLower = question.toLowerCase();
     
     // Contact Information for specific reviewer
@@ -93,32 +91,8 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
       return `Yesterday you received ${yesterdayReviews.length} reviews with an average rating of ${averageRating.toFixed(1)} stars.`;
     }
 
-    // Active campaigns
-    if (questionLower.includes("active campaign") || questionLower.includes("campaign")) {
-      const { data: campaigns } = await supabase
-        .from("campaigns")
-        .select("*")
-        .eq("status", "active");
-      
-      if (!campaigns || campaigns.length === 0) {
-        return "You don't have any active campaigns at the moment.";
-      }
-
-      return `You have ${campaigns.length} active campaign${campaigns.length > 1 ? 's' : ''}.${
-        campaigns.map(campaign => `\n- ${campaign.name}`).join('')
-      }`;
-    }
-
-    // Help message for unknown questions
-    return "I can help you with information about your reviews! You can ask me about:\n" +
-           "- Average rating\n" +
-           "- Last/recent review\n" +
-           "- Total number of reviews\n" +
-           "- Best/worst reviews\n" +
-           "- This month's performance\n" +
-           "- Rating distribution\n" +
-           "- Whether ratings are improving\n" +
-           "Feel free to ask any of these questions!";
+    // If no special command matches, return null to use AI
+    return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,18 +105,50 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
     setIsProcessing(true);
 
     try {
-      const response = await processQuestion(userMessage);
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: response },
-      ]);
+      // First check for special commands
+      const specialResponse = await processSpecialCommands(userMessage);
+      
+      if (specialResponse) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: specialResponse },
+        ]);
+      } else {
+        // If no special command matches, use AI
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            },
+            body: JSON.stringify({
+              message: userMessage,
+              restaurantId,
+              reviews,
+            }),
+          }
+        );
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: data.response },
+          ]);
+        } else {
+          throw new Error(data.error || 'Failed to get AI response');
+        }
+      }
     } catch (error) {
-      console.error("Error processing question:", error);
+      console.error("Error processing message:", error);
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "I'm sorry, I encountered an error while processing your question.",
+          content: "I apologize, but I encountered an error while processing your message. Please try again.",
         },
       ]);
     } finally {
@@ -155,7 +161,7 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
       <CardHeader className="flex-shrink-0">
         <CardTitle className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5" />
-          Business Assistant
+          AI Business Assistant
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col min-h-0">
