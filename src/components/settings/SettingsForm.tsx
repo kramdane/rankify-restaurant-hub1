@@ -60,6 +60,12 @@ export function SettingsForm({ userId }: SettingsFormProps) {
         .single();
 
       if (error) throw error;
+      
+      // Set form values when data is loaded
+      if (data) {
+        form.reset(data);
+      }
+      
       return data;
     },
     enabled: !!userId,
@@ -67,12 +73,29 @@ export function SettingsForm({ userId }: SettingsFormProps) {
 
   const mutation = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
-      const { error } = await supabase
+      // First check if a record exists
+      const { data: existingRestaurant } = await supabase
         .from("restaurants")
-        .upsert({ ...values, user_id: userId })
-        .eq("user_id", userId);
+        .select("id")
+        .eq("user_id", userId)
+        .single();
 
-      if (error) throw error;
+      if (existingRestaurant) {
+        // Update existing record
+        const { error } = await supabase
+          .from("restaurants")
+          .update(values)
+          .eq("user_id", userId);
+
+        if (error) throw error;
+      } else {
+        // Insert new record
+        const { error } = await supabase
+          .from("restaurants")
+          .insert([{ ...values, user_id: userId }]);
+
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["restaurant", userId] });
