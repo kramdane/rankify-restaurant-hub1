@@ -1,16 +1,12 @@
 import { useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { MessageSquare, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { ScrollArea } from "./ui/scroll-area";
-
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-}
+import { MessageBubble } from "./chat/MessageBubble";
+import { ChatInput } from "./chat/ChatInput";
+import { type Message } from "./chat/types";
 
 export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -141,18 +137,24 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
 
     const userMessage = input.trim();
     setInput("");
-    setMessages(prev => [...prev, { role: "user", content: userMessage }]);
+    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setIsProcessing(true);
 
     try {
       const response = await processQuestion(userMessage);
-      setMessages(prev => [...prev, { role: "assistant", content: response }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: response },
+      ]);
     } catch (error) {
       console.error("Error processing question:", error);
-      setMessages(prev => [...prev, { 
-        role: "assistant", 
-        content: "I'm sorry, I encountered an error while processing your question." 
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "I'm sorry, I encountered an error while processing your question.",
+        },
+      ]);
     } finally {
       setIsProcessing(false);
     }
@@ -160,51 +162,32 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
 
   return (
     <Card className="h-full flex flex-col">
-      <CardHeader>
+      <CardHeader className="flex-shrink-0">
         <CardTitle className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5" />
           Business Assistant
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col">
-        <ScrollArea className="flex-1 pr-4 mb-4">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`mb-4 ${
-                message.role === "assistant"
-                  ? "bg-primary/10 p-3 rounded-lg"
-                  : "bg-primary p-3 rounded-lg"
-              }`}
-            >
-              <p className={`text-sm whitespace-pre-line ${
-                message.role === "assistant" 
-                  ? "text-foreground" 
-                  : "text-white"
-              }`}>
-                {message.content}
-              </p>
-            </div>
-          ))}
-          {isProcessing && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm">Processing...</span>
-            </div>
-          )}
+      <CardContent className="flex-1 flex flex-col min-h-0">
+        <ScrollArea className="flex-1 pr-4 mb-4 min-h-0">
+          <div className="space-y-4">
+            {messages.map((message, index) => (
+              <MessageBubble key={index} message={message} />
+            ))}
+            {isProcessing && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">Processing...</span>
+              </div>
+            )}
+          </div>
         </ScrollArea>
-        <form onSubmit={handleSubmit} className="flex gap-2 mt-auto">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about your reviews..."
-            disabled={isProcessing}
-            className="flex-1"
-          />
-          <Button type="submit" disabled={isProcessing} size="icon">
-            ✈️
-          </Button>
-        </form>
+        <ChatInput
+          input={input}
+          setInput={setInput}
+          handleSubmit={handleSubmit}
+          isProcessing={isProcessing}
+        />
       </CardContent>
     </Card>
   );
