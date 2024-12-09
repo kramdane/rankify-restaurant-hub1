@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { TimeRangeSelect, TimeRange } from "@/components/TimeRangeSelect";
 import { useState } from "react";
 import { addDays, startOfDay, endOfDay } from "date-fns";
+import { FloatingChatBot } from "@/components/FloatingChatBot";
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>({
@@ -126,10 +127,10 @@ const Dashboard = () => {
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Welcome back, {restaurant?.name || "Restaurant Name"}
+            Welcome back, {restaurant?.name || "Business Name"}
           </h1>
           <p className="text-muted mt-2">
-            Here's what's happening with your restaurant
+            Here's what's happening with your business
           </p>
         </div>
 
@@ -154,12 +155,12 @@ const Dashboard = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ReviewsChart timeRange={timeRange} restaurantId={restaurant?.id} />
           <RecentReviews restaurantId={restaurant?.id} />
-          <ChatBot restaurantId={restaurant?.id} />
         </div>
       </div>
+      <FloatingChatBot restaurantId={restaurant?.id} />
     </DashboardLayout>
   );
 };

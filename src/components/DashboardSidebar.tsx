@@ -57,7 +57,7 @@ export function DashboardSidebar() {
                   <SidebarMenuButton asChild onClick={() => navigate(item.url)}>
                     <button className="w-full flex items-center gap-2 text-foreground hover:text-primary transition-colors">
                       <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
+                      <span className="text-foreground">{item.title}</span>
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -68,14 +68,14 @@ export function DashboardSidebar() {
         <div className="mt-auto p-4 space-y-2">
           <button
             onClick={() => navigate("/dashboard/settings")}
-            className="flex w-full items-center gap-2 text-muted hover:text-primary transition-colors px-2 py-1.5 rounded-md"
+            className="flex w-full items-center gap-2 text-foreground hover:text-primary transition-colors px-2 py-1.5 rounded-md"
           >
             <Settings className="h-5 w-5" />
             <span>Settings</span>
           </button>
           <button
             onClick={() => navigate("/login")}
-            className="flex w-full items-center gap-2 text-muted hover:text-primary transition-colors px-2 py-1.5 rounded-md"
+            className="flex w-full items-center gap-2 text-foreground hover:text-primary transition-colors px-2 py-1.5 rounded-md"
           >
             <LogOut className="h-5 w-5" />
             <span>Sign Out</span>
