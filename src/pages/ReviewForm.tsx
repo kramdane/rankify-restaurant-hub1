@@ -23,7 +23,7 @@ export default function ReviewForm() {
       const { data, error } = await supabase
         .from("restaurants")
         .select("*")
-        .eq("restaurant_id", restaurantId)
+        .eq("id", restaurantId)
         .single();
 
       if (error) {
@@ -157,4 +157,4 @@ export default function ReviewForm() {
       </form>
     </div>
   );
-}
+};
