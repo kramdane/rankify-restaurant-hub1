@@ -20,13 +20,19 @@ export default function ReviewForm() {
     queryFn: async () => {
       if (!restaurantId) return null;
       
+      // Add console.log to debug the query
+      console.log("Querying restaurant with ID:", restaurantId);
+      
       const { data, error } = await supabase
         .from("restaurants")
         .select("*")
-        .eq("id", restaurantId)
+        .eq("user_id", restaurantId) // Changed from id to user_id as that's the foreign key
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
       return data;
     },
     enabled: !!restaurantId,
