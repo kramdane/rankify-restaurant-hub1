@@ -2,34 +2,18 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { ReviewLink } from "@/components/ReviewLink";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Star, Download } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { DatePicker } from "@/components/ui/date-picker";
 import { format } from "date-fns";
+import { ExportDialog } from "@/components/ExportDialog";
 
 const Reviews = () => {
   const navigate = useNavigate();
   const [sortBy, setSortBy] = useState<"date" | "rating">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
 
   const { data: user } = useQuery({
     queryKey: ["user"],
@@ -83,8 +67,8 @@ const Reviews = () => {
     enabled: !!restaurant?.id,
   });
 
-  const handleExport = async () => {
-    if (!reviews || !startDate || !endDate) return;
+  const handleExport = (startDate: Date, endDate: Date) => {
+    if (!reviews) return;
 
     const filteredReviews = reviews.filter(review => {
       const reviewDate = new Date(review.created_at);
@@ -163,36 +147,7 @@ const Reviews = () => {
               </Button>
             </div>
 
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Download className="h-4 w-4" />
-                  Exporter
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Exporter les avis</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="flex flex-col gap-2">
-                    <label>Date de début</label>
-                    <DatePicker date={startDate} setDate={setStartDate} />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label>Date de fin</label>
-                    <DatePicker date={endDate} setDate={setEndDate} />
-                  </div>
-                  <Button 
-                    onClick={handleExport}
-                    disabled={!startDate || !endDate}
-                    className="w-full"
-                  >
-                    Exporter en CSV
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <ExportDialog onExport={handleExport} />
           </div>
         </div>
 
