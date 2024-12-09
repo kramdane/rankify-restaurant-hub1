@@ -32,6 +32,8 @@ export default function ReviewForm() {
         console.error("Error fetching restaurant:", error);
         throw error;
       }
+
+      console.log("Restaurant data:", data);
       return data;
     },
     enabled: !!restaurantId,
@@ -76,35 +78,48 @@ export default function ReviewForm() {
       comment,
     });
 
-    const { error } = await supabase
-      .from("reviews")
-      .insert([{
-        restaurant_id: restaurantId,
-        rating,
-        reviewer_name: reviewerName,
-        email,
-        phone,
-        comment,
-        source: 'form'
-      }]);
+    try {
+      const { data, error } = await supabase
+        .from("reviews")
+        .insert([
+          {
+            restaurant_id: restaurantId,
+            rating,
+            reviewer_name: reviewerName,
+            email,
+            phone,
+            comment,
+            source: 'form'
+          }
+        ])
+        .select()
+        .single();
 
-    if (error) {
-      console.error("Error submitting review:", error);
+      if (error) {
+        console.error("Error submitting review:", error);
+        toast({
+          title: "Error",
+          description: "Failed to submit review. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("Review submitted successfully:", data);
+      setSubmittedRating(rating);
+      setIsSubmitted(true);
+      toast({
+        title: "Success",
+        description: "Your review has been submitted successfully!",
+      });
+    } catch (error) {
+      console.error("Unexpected error during review submission:", error);
       toast({
         title: "Error",
-        description: "Failed to submit review. Please try again.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
-      return;
     }
-
-    console.log("Review submitted successfully");
-    setSubmittedRating(rating);
-    setIsSubmitted(true);
-    toast({
-      title: "Success",
-      description: "Your review has been submitted successfully!",
-    });
   };
 
   if (isSubmitted) {
