@@ -3,10 +3,9 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { ReviewSubmissionFeedback } from "@/components/reviews/ReviewSubmissionFeedback";
-import { StarRating } from "@/components/StarRating";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
+import { ReviewFormFields } from "@/components/reviews/ReviewFormFields";
+import { useToast } from "@/hooks/use-toast";
+import type { ReviewFormData } from "@/types/review";
 
 export default function ReviewForm() {
   const { restaurantId } = useParams();
@@ -64,34 +63,22 @@ export default function ReviewForm() {
     }
 
     const formData = new FormData(e.currentTarget);
-    const reviewerName = formData.get("reviewer_name") as string;
-    const email = formData.get("email") as string;
-    const phone = formData.get("phone") as string;
-    const comment = formData.get("comment") as string;
-
-    console.log("Submitting review with data:", {
-      restaurantId,
+    const reviewData: ReviewFormData = {
+      restaurant_id: restaurantId,
       rating,
-      reviewerName,
-      email,
-      phone,
-      comment,
-    });
+      reviewer_name: formData.get("reviewer_name") as string,
+      email: formData.get("email") as string,
+      phone: formData.get("phone") as string || undefined,
+      comment: formData.get("comment") as string,
+      source: 'form'
+    };
+
+    console.log("Submitting review with data:", reviewData);
 
     try {
       const { data, error } = await supabase
         .from("reviews")
-        .insert([
-          {
-            restaurant_id: restaurantId,
-            rating,
-            reviewer_name: reviewerName,
-            email,
-            phone,
-            comment,
-            source: 'form'
-          }
-        ])
+        .insert([reviewData])
         .select()
         .single();
 
@@ -142,63 +129,7 @@ export default function ReviewForm() {
     <div className="container max-w-2xl mx-auto p-6">
       <form onSubmit={handleSubmit} className="space-y-6">
         <h2 className="text-2xl font-bold">Leave a Review</h2>
-        
-        <div className="space-y-2">
-          <label htmlFor="reviewer_name" className="text-sm font-medium">
-            Your Name
-          </label>
-          <Input
-            type="text"
-            id="reviewer_name"
-            name="reviewer_name"
-            required
-            placeholder="Enter your name"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium">
-            Email
-          </label>
-          <Input
-            type="email"
-            id="email"
-            name="email"
-            required
-            placeholder="Enter your email"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="phone" className="text-sm font-medium">
-            Phone Number
-          </label>
-          <Input
-            type="tel"
-            id="phone"
-            name="phone"
-            placeholder="Enter your phone number"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Rating</label>
-          <StarRating value={rating} onChange={setRating} />
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="comment" className="text-sm font-medium">
-            Your Review
-          </label>
-          <Textarea
-            id="comment"
-            name="comment"
-            required
-            placeholder="Write your review here"
-            rows={4}
-          />
-        </div>
-
+        <ReviewFormFields rating={rating} setRating={setRating} />
         <button
           type="submit"
           className="w-full bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90 transition-colors"
