@@ -21,28 +21,31 @@ const ReviewForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!rating) {
-      toast.error("Veuillez sélectionner une note");
+      toast.error("Please select a rating");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("reviews").insert({
-        restaurant_id: restaurantId,
-        rating,
-        reviewer_name: reviewerName,
-        email,
-        phone,
-        comment,
-      });
+      const { error } = await supabase
+        .from("reviews")
+        .insert({
+          restaurant_id: restaurantId,
+          rating,
+          reviewer_name: reviewerName,
+          email,
+          phone,
+          comment,
+          created_at: new Date().toISOString(),
+        });
 
       if (error) throw error;
 
-      toast.success("Merci pour votre avis !");
+      toast.success("Thank you for your review!");
       navigate("/");
     } catch (error) {
-      toast.error("Erreur lors de l'envoi de l'avis. Veuillez réessayer.");
       console.error("Error submitting review:", error);
+      toast.error("Error submitting review. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -51,7 +54,7 @@ const ReviewForm = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
-        <h1 className="text-2xl font-bold text-center mb-6">Laisser un avis</h1>
+        <h1 className="text-2xl font-bold text-center mb-6">Leave a Review</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex justify-center space-x-2">
             {[1, 2, 3, 4, 5].map((index) => (
@@ -75,7 +78,7 @@ const ReviewForm = () => {
           </div>
           <div className="space-y-2">
             <label htmlFor="name" className="block text-sm font-medium">
-              Votre nom
+              Your Name
             </label>
             <Input
               id="name"
@@ -98,7 +101,7 @@ const ReviewForm = () => {
           </div>
           <div className="space-y-2">
             <label htmlFor="phone" className="block text-sm font-medium">
-              Téléphone
+              Phone
             </label>
             <Input
               id="phone"
@@ -110,7 +113,7 @@ const ReviewForm = () => {
           </div>
           <div className="space-y-2">
             <label htmlFor="comment" className="block text-sm font-medium">
-              Votre commentaire
+              Your Comment
             </label>
             <Textarea
               id="comment"
@@ -125,7 +128,7 @@ const ReviewForm = () => {
             className="w-full"
             disabled={isSubmitting || !rating}
           >
-            {isSubmitting ? "Envoi en cours..." : "Envoyer l'avis"}
+            {isSubmitting ? "Submitting..." : "Submit Review"}
           </Button>
         </form>
       </div>
