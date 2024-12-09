@@ -3,11 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, MessageSquare, Menu as MenuIcon, TrendingUp } from "lucide-react";
 import { ReviewsChart } from "@/components/ReviewsChart";
 import { RecentReviews } from "@/components/RecentReviews";
+import { ChatBot } from "@/components/ChatBot";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { TimeRangeSelect, TimeRange } from "@/components/TimeRangeSelect";
 import { useState } from "react";
-import { addDays, startOfDay, endOfDay, subDays } from "date-fns";
+import { addDays, startOfDay, endOfDay } from "date-fns";
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>({
@@ -152,6 +153,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <ReviewsChart timeRange={timeRange} restaurantId={restaurant?.id} />
           <RecentReviews restaurantId={restaurant?.id} />
+          <ChatBot restaurantId={restaurant?.id} />
         </div>
       </div>
     </DashboardLayout>
