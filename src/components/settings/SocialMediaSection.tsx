@@ -1,5 +1,6 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UseFormReturn } from "react-hook-form";
 import { SettingsFormValues } from "./settingsFormSchema";
@@ -15,6 +16,29 @@ export function SocialMediaSection({ form }: SocialMediaSectionProps) {
         <CardTitle>Social Media & Online Presence</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <FormField
+          control={form.control}
+          name="preferred_social_media"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Preferred Review Platform</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select preferred platform" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="google">Google Business</SelectItem>
+                  <SelectItem value="facebook">Facebook</SelectItem>
+                  <SelectItem value="tripadvisor">Tripadvisor</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="facebook_url"

@@ -10,6 +10,7 @@ export const settingsFormSchema = z.object({
   facebook_url: z.string().url().optional().or(z.literal("")),
   google_business_url: z.string().url().optional().or(z.literal("")),
   tripadvisor_url: z.string().url().optional().or(z.literal("")),
+  preferred_social_media: z.enum(["google", "facebook", "tripadvisor"]).default("google"),
 });
 
 export type SettingsFormValues = z.infer<typeof settingsFormSchema>;
