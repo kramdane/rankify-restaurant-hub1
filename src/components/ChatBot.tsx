@@ -7,6 +7,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { MessageBubble } from "./chat/MessageBubble";
 import { ChatInput } from "./chat/ChatInput";
 import { type Message } from "./chat/types";
+import { exportReviews, getYesterdayReviews, getReviewerContact } from "@/utils/chatBotUtils";
 
 export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -59,137 +60,53 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
 
     const questionLower = question.toLowerCase();
     
-    // Contact Information
-    if (questionLower.includes("phone number")) {
-      return restaurant?.phone 
-        ? `Your registered phone number is: ${restaurant.phone}`
-        : "I couldn't find your phone number in the records.";
-    }
-    
-    if (questionLower.includes("email address")) {
-      return restaurant?.email 
-        ? `Your registered email address is: ${restaurant.email}`
-        : "I couldn't find your email address in the records.";
-    }
-
-    // Most Active Reviewer
-    if (questionLower.includes("most review") || questionLower.includes("most active")) {
-      const reviewerCounts = reviews.reduce((acc: Record<string, number>, review) => {
-        acc[review.reviewer_name] = (acc[review.reviewer_name] || 0) + 1;
-        return acc;
-      }, {});
-      
-      const mostActiveReviewer = Object.entries(reviewerCounts).reduce((a, b) => 
-        b[1] > a[1] ? b : a
-      );
-      
-      return `${mostActiveReviewer[0]} is your most active reviewer with ${mostActiveReviewer[1]} reviews.`;
+    // Contact Information for specific reviewer
+    if (questionLower.includes("phone number of") || questionLower.includes("contact for")) {
+      const nameMatch = question.match(/(?:of|for)\s+(.+?)(?:\s|$)/i);
+      if (nameMatch && nameMatch[1]) {
+        const reviewerName = nameMatch[1].trim();
+        const contact = getReviewerContact(reviews, reviewerName);
+        if (contact) {
+          return `Contact information for ${reviewerName}:\n${contact.phone ? `Phone: ${contact.phone}` : "No phone number available"}\n${contact.email ? `Email: ${contact.email}` : "No email available"}`;
+        }
+        return `I couldn't find any reviews from ${reviewerName}.`;
+      }
+      return "Please specify the name of the reviewer you're asking about.";
     }
 
-    // Today's Average Rating
-    if (questionLower.includes("today")) {
-      const today = new Date();
-      const todayReviews = reviews.filter(review => {
-        const reviewDate = new Date(review.created_at);
-        return (
-          reviewDate.getDate() === today.getDate() &&
-          reviewDate.getMonth() === today.getMonth() &&
-          reviewDate.getFullYear() === today.getFullYear()
-        );
-      });
-
-      if (todayReviews.length === 0) {
-        return "There are no reviews yet for today.";
+    // Yesterday's reviews
+    if (questionLower.includes("yesterday")) {
+      const yesterdayReviews = getYesterdayReviews(reviews);
+      if (yesterdayReviews.length === 0) {
+        return "There were no reviews yesterday.";
       }
 
-      const averageRating = todayReviews.reduce((sum, review) => sum + review.rating, 0) / todayReviews.length;
-      return `Today's average rating is ${averageRating.toFixed(1)} stars from ${todayReviews.length} reviews.`;
+      const averageRating = yesterdayReviews.reduce((sum, review) => sum + review.rating, 0) / yesterdayReviews.length;
+      
+      if (questionLower.includes("export")) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const count = await exportReviews(yesterdayReviews, yesterday);
+        return `Yesterday you received ${count} reviews with an average rating of ${averageRating.toFixed(1)} stars. I've exported them to a CSV file for you.`;
+      }
+
+      return `Yesterday you received ${yesterdayReviews.length} reviews with an average rating of ${averageRating.toFixed(1)} stars.`;
     }
 
-    // Basic statistics
-    if (questionLower.includes("average rating") || questionLower.includes("average score")) {
-      const average = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
-      return `Your average rating is ${average.toFixed(1)} stars based on ${reviews.length} reviews.`;
-    }
-    
-    if (questionLower.includes("last review") || questionLower.includes("recent review")) {
-      const lastReview = reviews[0];
-      if (lastReview) {
-        return `Your most recent review was ${lastReview.rating} stars with the comment: "${lastReview.comment}" from ${lastReview.reviewer_name} on ${new Date(lastReview.created_at).toLocaleDateString()}.`;
+    // Active campaigns
+    if (questionLower.includes("active campaign") || questionLower.includes("campaign")) {
+      const { data: campaigns } = await supabase
+        .from("campaigns")
+        .select("*")
+        .eq("status", "active");
+      
+      if (!campaigns || campaigns.length === 0) {
+        return "You don't have any active campaigns at the moment.";
       }
-      return "I couldn't find any reviews.";
-    }
-    
-    if (questionLower.includes("how many reviews")) {
-      return `You have a total of ${reviews.length} reviews.`;
-    }
-    
-    // Best and worst reviews
-    if (questionLower.includes("best review")) {
-      const bestReview = [...reviews].sort((a, b) => b.rating - a.rating)[0];
-      if (bestReview) {
-        return `Your best review is ${bestReview.rating} stars from ${bestReview.reviewer_name}: "${bestReview.comment}"`;
-      }
-      return "I couldn't find any reviews.";
-    }
-    
-    if (questionLower.includes("worst review")) {
-      const worstReview = [...reviews].sort((a, b) => a.rating - b.rating)[0];
-      if (worstReview) {
-        return `Your lowest rated review is ${worstReview.rating} stars from ${worstReview.reviewer_name}: "${worstReview.comment}"`;
-      }
-      return "I couldn't find any reviews.";
-    }
 
-    // Time-based analysis
-    if (questionLower.includes("this month") || questionLower.includes("current month")) {
-      const thisMonth = reviews.filter(review => {
-        const reviewDate = new Date(review.created_at);
-        const now = new Date();
-        return reviewDate.getMonth() === now.getMonth() && 
-               reviewDate.getFullYear() === now.getFullYear();
-      });
-      return `This month you have received ${thisMonth.length} reviews with an average rating of ${
-        (thisMonth.reduce((sum, review) => sum + review.rating, 0) / thisMonth.length || 0).toFixed(1)
-      } stars.`;
-    }
-
-    // Rating distribution
-    if (questionLower.includes("rating distribution") || questionLower.includes("ratings breakdown")) {
-      const distribution = reviews.reduce((acc, review) => {
-        acc[review.rating] = (acc[review.rating] || 0) + 1;
-        return acc;
-      }, {} as Record<number, number>);
-      
-      let response = "Here's your rating distribution:\n";
-      for (let i = 5; i >= 1; i--) {
-        response += `${i} stars: ${distribution[i] || 0} reviews\n`;
-      }
-      return response;
-    }
-
-    // Trend analysis
-    if (questionLower.includes("improving") || questionLower.includes("getting better")) {
-      const sortedReviews = [...reviews].sort((a, b) => 
-        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      );
-      
-      if (sortedReviews.length < 2) return "I need more reviews to analyze trends.";
-      
-      const firstHalf = sortedReviews.slice(0, Math.floor(sortedReviews.length / 2));
-      const secondHalf = sortedReviews.slice(Math.floor(sortedReviews.length / 2));
-      
-      const firstAvg = firstHalf.reduce((sum, review) => sum + review.rating, 0) / firstHalf.length;
-      const secondAvg = secondHalf.reduce((sum, review) => sum + review.rating, 0) / secondHalf.length;
-      
-      const difference = secondAvg - firstAvg;
-      if (difference > 0.2) {
-        return `Yes! Your ratings are improving. Your average rating has increased by ${difference.toFixed(1)} stars.`;
-      } else if (difference < -0.2) {
-        return `Your ratings have decreased by ${Math.abs(difference).toFixed(1)} stars. Consider addressing recent customer feedback.`;
-      } else {
-        return "Your ratings have remained relatively stable.";
-      }
+      return `You have ${campaigns.length} active campaign${campaigns.length > 1 ? 's' : ''}.${
+        campaigns.map(campaign => `\n- ${campaign.name}`).join('')
+      }`;
     }
 
     // Help message for unknown questions
