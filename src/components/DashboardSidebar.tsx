@@ -44,7 +44,7 @@ export function DashboardSidebar() {
 
   return (
     <Sidebar className="bg-accent border-r border-accent/20">
-      <SidebarContent>
+      <SidebarContent className="bg-accent">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-primary">Rankify</h1>
         </div>

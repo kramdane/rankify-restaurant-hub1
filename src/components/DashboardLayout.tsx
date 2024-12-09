@@ -31,9 +31,9 @@ const DashboardContent = ({ children }: DashboardLayoutProps) => {
           <div className="w-10" />
         </header>
       )}
-      <div className="flex flex-1">
+      <div className="flex flex-1 relative">
         <DashboardSidebar />
-        <main className="flex-1 p-8 bg-background">{children}</main>
+        <main className="flex-1 p-8 bg-background relative">{children}</main>
       </div>
     </div>
   );
