@@ -21,14 +21,29 @@ export default function ReviewForm() {
       if (error) throw error;
       return data;
     },
+    enabled: !!restaurantId,
   });
 
-  const handleSubmit = async (formData: any) => {
-    const { rating } = formData;
-    // Assuming you have a function to submit the review
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const rating = Number(formData.get("rating"));
+    const reviewerName = formData.get("reviewer_name") as string;
+    const email = formData.get("email") as string;
+    const phone = formData.get("phone") as string;
+    const comment = formData.get("comment") as string;
+
     await supabase
       .from("reviews")
-      .insert([{ restaurant_id: restaurantId, rating }]);
+      .insert([{
+        restaurant_id: restaurantId,
+        rating,
+        reviewer_name: reviewerName,
+        email,
+        phone,
+        comment,
+        source: 'form'
+      }]);
 
     setSubmittedRating(rating);
     setIsSubmitted(true);
@@ -51,25 +66,83 @@ export default function ReviewForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-2xl font-bold">Leave a Review</h2>
-      <div>
-        <label htmlFor="rating" className="block text-sm font-medium">
-          Rating
-        </label>
-        <input
-          type="number"
-          id="rating"
-          name="rating"
-          min="1"
-          max="5"
-          required
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50"
-        />
-      </div>
-      <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md">
-        Submit Review
-      </button>
-    </form>
+    <div className="container max-w-2xl mx-auto p-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <h2 className="text-2xl font-bold">Leave a Review</h2>
+        
+        <div>
+          <label htmlFor="reviewer_name" className="block text-sm font-medium">
+            Your Name
+          </label>
+          <input
+            type="text"
+            id="reviewer_name"
+            name="reviewer_name"
+            required
+            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:ring focus:ring-opacity-50"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium">
+            Email
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:ring focus:ring-opacity-50"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="phone" className="block text-sm font-medium">
+            Phone Number
+          </label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:ring focus:ring-opacity-50"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="rating" className="block text-sm font-medium">
+            Rating
+          </label>
+          <input
+            type="number"
+            id="rating"
+            name="rating"
+            min="1"
+            max="5"
+            required
+            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:ring focus:ring-opacity-50"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="comment" className="block text-sm font-medium">
+            Your Review
+          </label>
+          <textarea
+            id="comment"
+            name="comment"
+            required
+            rows={4}
+            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:ring focus:ring-opacity-50"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors"
+        >
+          Submit Review
+        </button>
+      </form>
+    </div>
   );
 }
