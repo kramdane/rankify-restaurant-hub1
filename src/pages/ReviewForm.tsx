@@ -40,6 +40,7 @@ export default function ReviewForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Form submission started");
+    console.log("Restaurant ID from params:", restaurantId);
 
     if (!restaurantId) {
       console.error("Restaurant ID is missing");
@@ -62,13 +63,37 @@ export default function ReviewForm() {
     }
 
     const formData = new FormData(e.currentTarget);
+    const reviewerName = formData.get("reviewer_name") as string;
+    const email = formData.get("email") as string;
+    const phone = formData.get("phone") as string;
+    const comment = formData.get("comment") as string;
+
+    console.log("Form data collected:", {
+      reviewerName,
+      email,
+      phone,
+      comment,
+      rating,
+      restaurantId
+    });
+
+    if (!reviewerName || !email || !comment) {
+      console.error("Missing required fields");
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const reviewData = {
       restaurant_id: restaurantId,
       rating,
-      reviewer_name: formData.get("reviewer_name") as string,
-      email: formData.get("email") as string,
-      phone: formData.get("phone") as string || null,
-      comment: formData.get("comment") as string,
+      reviewer_name: reviewerName,
+      email,
+      phone: phone || null,
+      comment,
       source: 'form' as const
     };
 
@@ -83,9 +108,12 @@ export default function ReviewForm() {
 
       if (error) {
         console.error("Supabase error details:", error);
+        console.error("Error code:", error.code);
+        console.error("Error message:", error.message);
+        console.error("Error details:", error.details);
         toast({
           title: "Error",
-          description: "Failed to submit review. Please try again.",
+          description: `Failed to submit review: ${error.message}`,
           variant: "destructive",
         });
         return;
