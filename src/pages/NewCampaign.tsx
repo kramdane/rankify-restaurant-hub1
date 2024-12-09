@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactSelection } from "@/components/ContactSelection";
 import { TemplateSelection } from "@/components/TemplateSelection";
+import { toast } from "sonner";
 
 const CAMPAIGN_STEPS = ["contacts", "template", "preview"] as const;
 type CampaignStep = typeof CAMPAIGN_STEPS[number];
