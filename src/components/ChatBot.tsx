@@ -159,25 +159,31 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
   };
 
   return (
-    <Card className="col-span-full lg:col-span-1">
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5" />
-          Restaurant Assistant
+          Business Assistant
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[300px] pr-4 mb-4">
+      <CardContent className="flex-1 flex flex-col">
+        <ScrollArea className="flex-1 pr-4 mb-4">
           {messages.map((message, index) => (
             <div
               key={index}
               className={`mb-4 ${
                 message.role === "assistant"
                   ? "bg-primary/10 p-3 rounded-lg"
-                  : "bg-muted p-3 rounded-lg"
+                  : "bg-primary p-3 rounded-lg"
               }`}
             >
-              <p className="text-sm whitespace-pre-line">{message.content}</p>
+              <p className={`text-sm whitespace-pre-line ${
+                message.role === "assistant" 
+                  ? "text-foreground" 
+                  : "text-white"
+              }`}>
+                {message.content}
+              </p>
             </div>
           ))}
           {isProcessing && (
@@ -187,15 +193,16 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
             </div>
           )}
         </ScrollArea>
-        <form onSubmit={handleSubmit} className="flex gap-2">
+        <form onSubmit={handleSubmit} className="flex gap-2 mt-auto">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask about your reviews..."
             disabled={isProcessing}
+            className="flex-1"
           />
-          <Button type="submit" disabled={isProcessing}>
-            Send
+          <Button type="submit" disabled={isProcessing} size="icon">
+            ✈️
           </Button>
         </form>
       </CardContent>
