@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Star } from "lucide-react";
 
 const ReviewForm = () => {
   const { restaurantId } = useParams();
+  const navigate = useNavigate();
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [reviewerName, setReviewerName] = useState("");
@@ -34,9 +35,7 @@ const ReviewForm = () => {
       if (error) throw error;
 
       toast.success("Thank you for your review!");
-      setRating(0);
-      setReviewerName("");
-      setComment("");
+      navigate("/");
     } catch (error) {
       toast.error("Failed to submit review. Please try again.");
       console.error("Error submitting review:", error);

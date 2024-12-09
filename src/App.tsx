@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Menu from "./pages/Menu";
 import Contact from "./pages/Contact";
+import Reviews from "./pages/Reviews";
 import ReviewForm from "./pages/ReviewForm";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/menu" element={<Menu />} />
             <Route path="/dashboard/contact" element={<Contact />} />
+            <Route path="/dashboard/reviews" element={<Reviews />} />
             <Route path="/review/:restaurantId" element={<ReviewForm />} />
           </Routes>
         </AuthProvider>
