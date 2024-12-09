@@ -1,3 +1,12 @@
+-- Create function to update timestamps (if not exists)
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
 -- Create enum for campaign status
 CREATE TYPE campaign_status AS ENUM ('draft', 'scheduled', 'sent', 'completed');
 
@@ -42,15 +51,6 @@ CREATE TABLE campaign_recipients (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
--- Create trigger to update timestamps
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
 
 -- Add triggers to all tables
 CREATE TRIGGER update_templates_updated_at
