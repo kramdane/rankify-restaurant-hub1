@@ -37,6 +37,7 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
 
     const questionLower = question.toLowerCase();
     
+    // Basic statistics
     if (questionLower.includes("average rating") || questionLower.includes("average score")) {
       const average = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
       return `Your average rating is ${average.toFixed(1)} stars based on ${reviews.length} reviews.`;
@@ -54,6 +55,7 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
       return `You have a total of ${reviews.length} reviews.`;
     }
     
+    // Best and worst reviews
     if (questionLower.includes("best review")) {
       const bestReview = [...reviews].sort((a, b) => b.rating - a.rating)[0];
       if (bestReview) {
@@ -70,7 +72,67 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
       return "I couldn't find any reviews.";
     }
 
-    return "I can help you with information about your reviews! You can ask me about your average rating, last review, total number of reviews, or your best/worst reviews.";
+    // Time-based analysis
+    if (questionLower.includes("this month") || questionLower.includes("current month")) {
+      const thisMonth = reviews.filter(review => {
+        const reviewDate = new Date(review.created_at);
+        const now = new Date();
+        return reviewDate.getMonth() === now.getMonth() && 
+               reviewDate.getFullYear() === now.getFullYear();
+      });
+      return `This month you have received ${thisMonth.length} reviews with an average rating of ${
+        (thisMonth.reduce((sum, review) => sum + review.rating, 0) / thisMonth.length || 0).toFixed(1)
+      } stars.`;
+    }
+
+    // Rating distribution
+    if (questionLower.includes("rating distribution") || questionLower.includes("ratings breakdown")) {
+      const distribution = reviews.reduce((acc, review) => {
+        acc[review.rating] = (acc[review.rating] || 0) + 1;
+        return acc;
+      }, {} as Record<number, number>);
+      
+      let response = "Here's your rating distribution:\n";
+      for (let i = 5; i >= 1; i--) {
+        response += `${i} stars: ${distribution[i] || 0} reviews\n`;
+      }
+      return response;
+    }
+
+    // Trend analysis
+    if (questionLower.includes("improving") || questionLower.includes("getting better")) {
+      const sortedReviews = [...reviews].sort((a, b) => 
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+      
+      if (sortedReviews.length < 2) return "I need more reviews to analyze trends.";
+      
+      const firstHalf = sortedReviews.slice(0, Math.floor(sortedReviews.length / 2));
+      const secondHalf = sortedReviews.slice(Math.floor(sortedReviews.length / 2));
+      
+      const firstAvg = firstHalf.reduce((sum, review) => sum + review.rating, 0) / firstHalf.length;
+      const secondAvg = secondHalf.reduce((sum, review) => sum + review.rating, 0) / secondHalf.length;
+      
+      const difference = secondAvg - firstAvg;
+      if (difference > 0.2) {
+        return `Yes! Your ratings are improving. Your average rating has increased by ${difference.toFixed(1)} stars.`;
+      } else if (difference < -0.2) {
+        return `Your ratings have decreased by ${Math.abs(difference).toFixed(1)} stars. Consider addressing recent customer feedback.`;
+      } else {
+        return "Your ratings have remained relatively stable.";
+      }
+    }
+
+    // Help message for unknown questions
+    return "I can help you with information about your reviews! You can ask me about:\n" +
+           "- Average rating\n" +
+           "- Last/recent review\n" +
+           "- Total number of reviews\n" +
+           "- Best/worst reviews\n" +
+           "- This month's performance\n" +
+           "- Rating distribution\n" +
+           "- Whether ratings are improving\n" +
+           "Feel free to ask any of these questions!";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -115,7 +177,7 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
                   : "bg-muted p-3 rounded-lg"
               }`}
             >
-              <p className="text-sm">{message.content}</p>
+              <p className="text-sm whitespace-pre-line">{message.content}</p>
             </div>
           ))}
           {isProcessing && (
