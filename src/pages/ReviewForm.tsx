@@ -27,7 +27,23 @@ const ReviewForm = () => {
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
+      // First, add the contact
+      const { data: contact, error: contactError } = await supabase
+        .from('contacts')
+        .upsert({
+          firstName: reviewerName.split(' ')[0],
+          lastName: reviewerName.split(' ').slice(1).join(' '),
+          email,
+          phone,
+          restaurant_id: restaurantId,
+        }, {
+          onConflict: 'email,phone,restaurant_id'
+        });
+
+      if (contactError) throw contactError;
+
+      // Then add the review
+      const { error: reviewError } = await supabase
         .from("reviews")
         .insert({
           restaurant_id: restaurantId,
@@ -39,7 +55,7 @@ const ReviewForm = () => {
           created_at: new Date().toISOString(),
         });
 
-      if (error) throw error;
+      if (reviewError) throw reviewError;
 
       toast.success("Thank you for your review!");
       navigate("/");

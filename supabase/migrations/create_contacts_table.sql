@@ -14,10 +14,12 @@ CREATE TABLE contacts (
     lastName TEXT NOT NULL,
     email TEXT,
     phone TEXT,
+    restaurant_id TEXT NOT NULL,
     reviewCount INTEGER DEFAULT 0,
     addedDate TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(email, phone, restaurant_id)
 );
 
 -- Create trigger to update timestamps

@@ -11,25 +11,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useForm } from "react-hook-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
-import { toast } from "sonner";
+import { ContactSelection } from "@/components/ContactSelection";
+import { TemplateSelection } from "@/components/TemplateSelection";
 
 const CAMPAIGN_STEPS = ["contacts", "template", "preview"] as const;
 type CampaignStep = typeof CAMPAIGN_STEPS[number];
-
-interface Contact {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  reviewCount: number;
-}
 
 const NewCampaign = () => {
   const [currentStep, setCurrentStep] = useState<CampaignStep>("contacts");
@@ -39,23 +28,18 @@ const NewCampaign = () => {
   const form = useForm({
     defaultValues: {
       name: "",
-      template: "template1",
+      template: "",
       channel: "email",
     },
   });
 
-  const { data: contacts, isLoading: isLoadingContacts } = useQuery({
-    queryKey: ['contacts'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('contacts')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as Contact[];
-    },
-  });
+  const toggleContact = (contactId: string) => {
+    setSelectedContacts(prev => 
+      prev.includes(contactId)
+        ? prev.filter(id => id !== contactId)
+        : [...prev, contactId]
+    );
+  };
 
   const handleNext = async () => {
     if (currentStep === "contacts" && selectedContacts.length === 0) {
@@ -74,14 +58,6 @@ const NewCampaign = () => {
     if (currentIndex > 0) {
       setCurrentStep(CAMPAIGN_STEPS[currentIndex - 1]);
     }
-  };
-
-  const toggleContact = (contactId: string) => {
-    setSelectedContacts(prev => 
-      prev.includes(contactId)
-        ? prev.filter(id => id !== contactId)
-        : [...prev, contactId]
-    );
   };
 
   return (
@@ -133,36 +109,11 @@ const NewCampaign = () => {
                     />
                   </Form>
 
-                  <div className="mt-6">
-                    <h3 className="text-lg font-medium mb-4">Select Contacts</h3>
-                    {isLoadingContacts ? (
-                      <div>Loading contacts...</div>
-                    ) : (
-                      <div className="space-y-2">
-                        {contacts?.map((contact) => (
-                          <div
-                            key={contact.id}
-                            className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded"
-                          >
-                            <Checkbox
-                              id={contact.id}
-                              checked={selectedContacts.includes(contact.id)}
-                              onCheckedChange={() => toggleContact(contact.id)}
-                            />
-                            <label
-                              htmlFor={contact.id}
-                              className="flex-1 flex items-center justify-between cursor-pointer"
-                            >
-                              <span>{contact.firstName} {contact.lastName}</span>
-                              <span className="text-sm text-gray-500">
-                                {form.watch("channel") === "email" ? contact.email : contact.phone}
-                              </span>
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <ContactSelection
+                    selectedContacts={selectedContacts}
+                    onContactToggle={toggleContact}
+                    channel={form.watch("channel")}
+                  />
                 </div>
               </TabsContent>
 
@@ -181,6 +132,23 @@ const NewCampaign = () => {
                         </FormItem>
                       )}
                     />
+                    
+                    <FormField
+                      control={form.control}
+                      name="template"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Template</FormLabel>
+                          <FormControl>
+                            <TemplateSelection
+                              value={field.value}
+                              onChange={field.onChange}
+                              channel={form.watch("channel")}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </Form>
               </TabsContent>
@@ -190,9 +158,7 @@ const NewCampaign = () => {
                   <div className="border rounded-lg p-4">
                     <h3 className="font-medium mb-2">Selected Contacts ({selectedContacts.length})</h3>
                     <div className="text-sm text-gray-600">
-                      {contacts?.filter(c => selectedContacts.includes(c.id))
-                        .map(c => `${c.firstName} ${c.lastName}`)
-                        .join(", ")}
+                      {/* Contact preview will be populated by the query */}
                     </div>
                   </div>
                 </div>
