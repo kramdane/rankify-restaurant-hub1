@@ -3,22 +3,22 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For MVP, we'll just simulate login
-    if (email && password) {
-      toast.success("Login successful!");
-      navigate("/dashboard");
-    } else {
+    if (!email || !password) {
       toast.error("Please fill in all fields");
+      return;
     }
+    await signIn(email, password);
   };
 
   return (
@@ -46,6 +46,7 @@ const Login = () => {
                   placeholder="your@restaurant.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -57,6 +58,8 @@ const Login = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
                 />
               </div>
             </CardContent>

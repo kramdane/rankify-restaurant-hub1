@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -23,10 +24,17 @@ const Register = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (Object.values(formData).every((field) => field)) {
-      await signUp(formData.email, formData.password);
-      // The AuthContext will handle navigation and toast notifications
+    if (!Object.values(formData).every((field) => field)) {
+      toast.error("Please fill in all fields");
+      return;
     }
+    
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
+    
+    await signUp(formData.email, formData.password);
   };
 
   return (
@@ -51,6 +59,7 @@ const Register = () => {
                   placeholder="Your Restaurant Name"
                   value={formData.restaurantName}
                   onChange={handleChange}
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -61,6 +70,7 @@ const Register = () => {
                   placeholder="your@restaurant.com"
                   value={formData.email}
                   onChange={handleChange}
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -70,6 +80,8 @@ const Register = () => {
                   type="password"
                   value={formData.password}
                   onChange={handleChange}
+                  required
+                  minLength={6}
                 />
               </div>
               <div className="space-y-2">
@@ -80,6 +92,7 @@ const Register = () => {
                   placeholder="+1 (555) 000-0000"
                   value={formData.phone}
                   onChange={handleChange}
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -89,6 +102,7 @@ const Register = () => {
                   placeholder="123 Restaurant St, City, State"
                   value={formData.address}
                   onChange={handleChange}
+                  required
                 />
               </div>
             </CardContent>
