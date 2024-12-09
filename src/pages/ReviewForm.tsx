@@ -14,6 +14,8 @@ export default function ReviewForm() {
   const { data: restaurant } = useQuery({
     queryKey: ["restaurant", restaurantId],
     queryFn: async () => {
+      if (!restaurantId) throw new Error("Restaurant ID is required");
+      
       const { data, error } = await supabase
         .from("restaurants")
         .select("*")
