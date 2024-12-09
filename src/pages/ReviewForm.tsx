@@ -24,7 +24,10 @@ export default function ReviewForm() {
         .eq("id", restaurantId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching restaurant:", error);
+        throw error;
+      }
       return data;
     },
     enabled: !!restaurantId,
@@ -38,7 +41,12 @@ export default function ReviewForm() {
     const phone = formData.get("phone") as string;
     const comment = formData.get("comment") as string;
 
-    await supabase
+    if (!restaurantId) {
+      console.error("Restaurant ID is missing");
+      return;
+    }
+
+    const { error } = await supabase
       .from("reviews")
       .insert([{
         restaurant_id: restaurantId,
@@ -49,6 +57,11 @@ export default function ReviewForm() {
         comment,
         source: 'form'
       }]);
+
+    if (error) {
+      console.error("Error submitting review:", error);
+      return;
+    }
 
     setSubmittedRating(rating);
     setIsSubmitted(true);
