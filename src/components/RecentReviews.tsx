@@ -1,53 +1,39 @@
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Star } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { Button } from "./ui/button";
 
-// Mock data - replace with actual data from your backend
-const recentReviews = [
-  {
-    id: 1,
-    rating: 5,
-    comment: "Amazing food and service!",
-    author: "John D.",
-    date: "2024-03-07",
-  },
-  {
-    id: 2,
-    rating: 4,
-    comment: "Great experience overall",
-    author: "Sarah M.",
-    date: "2024-03-06",
-  },
-  {
-    id: 3,
-    rating: 5,
-    comment: "Best restaurant in town",
-    author: "Mike R.",
-    date: "2024-03-05",
-  },
-  {
-    id: 4,
-    rating: 3,
-    comment: "Good food but slow service",
-    author: "Emily L.",
-    date: "2024-03-04",
-  },
-  {
-    id: 5,
-    rating: 5,
-    comment: "Will definitely come back!",
-    author: "David S.",
-    date: "2024-03-03",
-  },
-];
+export const RecentReviews = ({ restaurantId }: { restaurantId?: number }) => {
+  const navigate = useNavigate();
 
-export const RecentReviews = () => {
+  const { data: reviews } = useQuery({
+    queryKey: ["recent-reviews", restaurantId],
+    queryFn: async () => {
+      if (!restaurantId) return [];
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("restaurant_id", restaurantId)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!restaurantId,
+  });
+
   return (
     <Card className="col-span-full lg:col-span-1">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Recent Reviews</CardTitle>
+        <Button variant="ghost" onClick={() => navigate("/dashboard/reviews")}>
+          View all
+        </Button>
       </CardHeader>
       <CardContent className="space-y-4">
-        {recentReviews.map((review) => (
+        {reviews?.map((review) => (
           <div
             key={review.id}
             className="flex items-start space-x-4 border-b border-gray-100 pb-4 last:border-0"
@@ -65,8 +51,8 @@ export const RecentReviews = () => {
             <div className="flex-1">
               <p className="text-sm text-gray-600">{review.comment}</p>
               <div className="mt-1 flex items-center justify-between text-xs text-gray-500">
-                <span>{review.author}</span>
-                <span>{new Date(review.date).toLocaleDateString()}</span>
+                <span>{review.reviewer_name}</span>
+                <span>{new Date(review.created_at).toLocaleDateString()}</span>
               </div>
             </div>
           </div>

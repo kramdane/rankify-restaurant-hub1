@@ -1,5 +1,4 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DatePicker } from "@/components/ui/date-picker";
 import { useState } from "react";
 import { addDays, startOfDay, endOfDay, startOfMonth, subMonths, subYears } from "date-fns";
 
@@ -13,9 +12,6 @@ interface TimeRangeSelectProps {
 }
 
 export const TimeRangeSelect = ({ onChange }: TimeRangeSelectProps) => {
-  const [customStart, setCustomStart] = useState<Date>();
-  const [customEnd, setCustomEnd] = useState<Date>();
-
   const handleRangeChange = (value: string) => {
     const now = new Date();
     let end = endOfDay(now);
@@ -41,12 +37,6 @@ export const TimeRangeSelect = ({ onChange }: TimeRangeSelectProps) => {
       case "lastYear":
         start = startOfDay(subYears(now, 1));
         break;
-      case "custom":
-        if (customStart && customEnd) {
-          start = startOfDay(customStart);
-          end = endOfDay(customEnd);
-        }
-        break;
       default:
         return;
     }
@@ -69,27 +59,8 @@ export const TimeRangeSelect = ({ onChange }: TimeRangeSelectProps) => {
           <SelectItem value="thisMonth">This month</SelectItem>
           <SelectItem value="last6months">Last 6 months</SelectItem>
           <SelectItem value="lastYear">Last year</SelectItem>
-          <SelectItem value="custom">Custom range</SelectItem>
         </SelectContent>
       </Select>
-
-      {customStart !== undefined && (
-        <div className="flex items-center gap-2">
-          <DatePicker date={customStart} setDate={(date) => {
-            setCustomStart(date);
-            if (date && customEnd) {
-              onChange({ start: startOfDay(date), end: endOfDay(customEnd) });
-            }
-          }} />
-          <span>to</span>
-          <DatePicker date={customEnd} setDate={(date) => {
-            setCustomEnd(date);
-            if (date && customStart) {
-              onChange({ start: startOfDay(customStart), end: endOfDay(date) });
-            }
-          }} />
-        </div>
-      )}
     </div>
   );
 };

@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { TimeRangeSelect, TimeRange } from "@/components/TimeRangeSelect";
 import { useState } from "react";
-import { addDays, startOfDay, endOfDay } from "date-fns";
+import { addDays, startOfDay, endOfDay, subDays } from "date-fns";
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>({
@@ -55,35 +55,68 @@ const Dashboard = () => {
     enabled: !!restaurant?.id,
   });
 
+  const { data: previousPeriodReviews } = useQuery({
+    queryKey: ["previous-reviews", restaurant?.id, timeRange],
+    queryFn: async () => {
+      if (!restaurant?.id) return [];
+      const periodLength = timeRange.end.getTime() - timeRange.start.getTime();
+      const previousStart = new Date(timeRange.start.getTime() - periodLength);
+      const previousEnd = new Date(timeRange.end.getTime() - periodLength);
+
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("restaurant_id", restaurant.id)
+        .gte("created_at", previousStart.toISOString())
+        .lte("created_at", previousEnd.toISOString());
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!restaurant?.id,
+  });
+
+  const calculatePercentageChange = (current: number, previous: number) => {
+    if (previous === 0) return current > 0 ? "+100%" : "0%";
+    const change = ((current - previous) / previous) * 100;
+    return `${change > 0 ? "+" : ""}${change.toFixed(1)}%`;
+  };
+
   const totalReviews = reviews?.length || 0;
+  const previousTotalReviews = previousPeriodReviews?.length || 0;
+  const reviewsChange = calculatePercentageChange(totalReviews, previousTotalReviews);
+
   const averageRating = reviews?.length 
     ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
     : "0.0";
+  const previousAverageRating = previousPeriodReviews?.length
+    ? (previousPeriodReviews.reduce((sum, review) => sum + review.rating, 0) / previousPeriodReviews.length).toFixed(1)
+    : "0.0";
+  const ratingChange = calculatePercentageChange(parseFloat(averageRating), parseFloat(previousAverageRating));
 
   const stats = [
     {
       title: "Total Reviews",
       value: totalReviews.toString(),
       icon: Star,
-      trend: `${reviews?.length || 0} in selected period`,
+      trend: reviewsChange,
     },
     {
       title: "Menu Items",
       value: "45",
       icon: MenuIcon,
-      trend: "3 new items added",
+      trend: "+5%",
     },
     {
       title: "Active Campaigns",
       value: "3",
       icon: MessageSquare,
-      trend: "2 ending soon",
+      trend: "0%",
     },
     {
       title: "Review Rate",
       value: averageRating,
       icon: TrendingUp,
-      trend: "Average rating in period",
+      trend: ratingChange,
     },
   ];
 
@@ -118,7 +151,7 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <ReviewsChart timeRange={timeRange} restaurantId={restaurant?.id} />
-          <RecentReviews />
+          <RecentReviews restaurantId={restaurant?.id} />
         </div>
       </div>
     </DashboardLayout>
