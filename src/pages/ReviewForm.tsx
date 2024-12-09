@@ -3,11 +3,13 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { ReviewSubmissionFeedback } from "@/components/reviews/ReviewSubmissionFeedback";
+import { StarRating } from "@/components/StarRating";
 
 export default function ReviewForm() {
   const { restaurantId } = useParams();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedRating, setSubmittedRating] = useState(0);
+  const [rating, setRating] = useState(0);
 
   const { data: restaurant } = useQuery({
     queryKey: ["restaurant", restaurantId],
@@ -27,7 +29,6 @@ export default function ReviewForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const rating = Number(formData.get("rating"));
     const reviewerName = formData.get("reviewer_name") as string;
     const email = formData.get("email") as string;
     const phone = formData.get("phone") as string;
@@ -109,18 +110,8 @@ export default function ReviewForm() {
         </div>
 
         <div>
-          <label htmlFor="rating" className="block text-sm font-medium">
-            Rating
-          </label>
-          <input
-            type="number"
-            id="rating"
-            name="rating"
-            min="1"
-            max="5"
-            required
-            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:ring focus:ring-opacity-50"
-          />
+          <label className="block text-sm font-medium">Rating</label>
+          <StarRating value={rating} onChange={setRating} />
         </div>
 
         <div>
