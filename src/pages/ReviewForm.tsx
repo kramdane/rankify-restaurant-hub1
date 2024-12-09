@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { ReviewSubmissionFeedback } from "@/components/reviews/ReviewSubmissionFeedback";
 import { StarRating } from "@/components/StarRating";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function ReviewForm() {
   const { restaurantId } = useParams();
@@ -70,68 +72,68 @@ export default function ReviewForm() {
 
   return (
     <div className="container max-w-2xl mx-auto p-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <h2 className="text-2xl font-bold">Leave a Review</h2>
         
-        <div>
-          <label htmlFor="reviewer_name" className="block text-sm font-medium">
+        <div className="space-y-2">
+          <label htmlFor="reviewer_name" className="text-sm font-medium">
             Your Name
           </label>
-          <input
+          <Input
             type="text"
             id="reviewer_name"
             name="reviewer_name"
             required
-            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:ring focus:ring-opacity-50"
+            placeholder="Enter your name"
           />
         </div>
 
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium">
+        <div className="space-y-2">
+          <label htmlFor="email" className="text-sm font-medium">
             Email
           </label>
-          <input
+          <Input
             type="email"
             id="email"
             name="email"
             required
-            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:ring focus:ring-opacity-50"
+            placeholder="Enter your email"
           />
         </div>
 
-        <div>
-          <label htmlFor="phone" className="block text-sm font-medium">
+        <div className="space-y-2">
+          <label htmlFor="phone" className="text-sm font-medium">
             Phone Number
           </label>
-          <input
+          <Input
             type="tel"
             id="phone"
             name="phone"
-            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:ring focus:ring-opacity-50"
+            placeholder="Enter your phone number"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium">Rating</label>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Rating</label>
           <StarRating value={rating} onChange={setRating} />
         </div>
 
-        <div>
-          <label htmlFor="comment" className="block text-sm font-medium">
+        <div className="space-y-2">
+          <label htmlFor="comment" className="text-sm font-medium">
             Your Review
           </label>
-          <textarea
+          <Textarea
             id="comment"
             name="comment"
             required
+            placeholder="Write your review here"
             rows={4}
-            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:ring focus:ring-opacity-50"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors"
+          className="w-full bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90 transition-colors"
         >
           Submit Review
         </button>
