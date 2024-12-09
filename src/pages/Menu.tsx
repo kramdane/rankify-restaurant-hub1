@@ -31,14 +31,14 @@ const Menu = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Menu Management</h1>
+          <h1 className="text-3xl font-bold text-foreground">Menu Management</h1>
           <Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
             <Plus className="h-4 w-4" /> Add Menu Item
           </Button>
         </div>
 
         {showForm ? (
-          <Card>
+          <Card className="bg-white shadow-sm">
             <CardHeader>
               <CardTitle>Add New Menu Item</CardTitle>
             </CardHeader>
@@ -48,7 +48,7 @@ const Menu = () => {
           </Card>
         ) : null}
 
-        <Card>
+        <Card className="bg-white shadow-sm">
           <CardHeader>
             <CardTitle>Menu Items</CardTitle>
           </CardHeader>
@@ -65,9 +65,9 @@ const Menu = () => {
               <TableBody>
                 {menuItems.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell>{item.name}</TableCell>
+                    <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{item.category}</TableCell>
-                    <TableCell>{item.description}</TableCell>
+                    <TableCell className="text-muted">{item.description}</TableCell>
                     <TableCell>${item.price.toFixed(2)}</TableCell>
                   </TableRow>
                 ))}

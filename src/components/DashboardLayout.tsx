@@ -14,9 +14,9 @@ const DashboardContent = ({ children }: DashboardLayoutProps) => {
   const isMobile = useIsMobile();
 
   return (
-    <div className="min-h-screen flex flex-col w-full">
+    <div className="min-h-screen flex flex-col w-full bg-background">
       {isMobile && (
-        <header className="flex items-center justify-between px-4 h-16 border-b bg-white">
+        <header className="flex items-center justify-between px-4 h-16 border-b bg-white shadow-sm">
           <Button
             variant="ghost"
             size="icon"
@@ -28,12 +28,12 @@ const DashboardContent = ({ children }: DashboardLayoutProps) => {
           <div className="absolute left-1/2 transform -translate-x-1/2">
             <h1 className="text-xl font-bold text-primary">Rankify</h1>
           </div>
-          <div className="w-10" /> {/* Spacer to balance the layout */}
+          <div className="w-10" />
         </header>
       )}
       <div className="flex flex-1">
         <DashboardSidebar />
-        <main className="flex-1 p-8 bg-gray-50">{children}</main>
+        <main className="flex-1 p-8 bg-background">{children}</main>
       </div>
     </div>
   );

@@ -22,22 +22,24 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
           <h1 className="text-4xl font-bold text-primary">Rankify</h1>
-          <p className="text-gray-600 mt-2">Restaurant Management Made Simple</p>
+          <p className="text-muted mt-2">Restaurant Management Made Simple</p>
         </div>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Welcome back</CardTitle>
-            <CardDescription>Sign in to your restaurant account</CardDescription>
+        <Card className="bg-white shadow-sm">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl text-foreground">Welcome back</CardTitle>
+            <CardDescription className="text-muted">
+              Sign in to your restaurant account
+            </CardDescription>
           </CardHeader>
           <form onSubmit={handleLogin}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="email">
+                <label className="text-sm font-medium text-foreground" htmlFor="email">
                   Email
                 </label>
                 <Input
@@ -47,10 +49,11 @@ const Login = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  className="bg-background border-input"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="password">
+                <label className="text-sm font-medium text-foreground" htmlFor="password">
                   Password
                 </label>
                 <Input
@@ -60,6 +63,7 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
+                  className="bg-background border-input"
                 />
               </div>
             </CardContent>

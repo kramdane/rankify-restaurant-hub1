@@ -125,8 +125,10 @@ const Dashboard = () => {
     <DashboardLayout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-bold">Welcome back, {restaurant?.name || "Restaurant Name"}</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-foreground">
+            Welcome back, {restaurant?.name || "Restaurant Name"}
+          </h1>
+          <p className="text-muted mt-2">
             Here's what's happening with your restaurant
           </p>
         </div>
@@ -135,16 +137,18 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat) => (
-            <Card key={stat.title}>
+            <Card key={stat.title} className="hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium text-muted">
                   {stat.title}
                 </CardTitle>
-                <stat.icon className="h-4 w-4 text-gray-500" />
+                <stat.icon className="h-4 w-4 text-muted" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-gray-600 mt-1">{stat.trend}</p>
+                <div className="text-2xl font-bold text-foreground">{stat.value}</div>
+                <p className={`text-xs mt-1 ${stat.trend.startsWith('+') ? 'text-green-600' : stat.trend.startsWith('-') ? 'text-red-600' : 'text-muted'}`}>
+                  {stat.trend}
+                </p>
               </CardContent>
             </Card>
           ))}
