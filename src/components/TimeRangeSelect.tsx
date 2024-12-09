@@ -18,7 +18,7 @@ export const TimeRangeSelect = ({ onChange }: TimeRangeSelectProps) => {
 
   const handleRangeChange = (value: string) => {
     const now = new Date();
-    const end = endOfDay(now);
+    let end = endOfDay(now);
     let start;
 
     switch (value) {
