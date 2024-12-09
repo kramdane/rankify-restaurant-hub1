@@ -5,7 +5,6 @@ import { supabase } from "@/lib/supabase";
 import { ReviewSubmissionFeedback } from "@/components/reviews/ReviewSubmissionFeedback";
 import { ReviewFormFields } from "@/components/reviews/ReviewFormFields";
 import { useToast } from "@/hooks/use-toast";
-import type { ReviewFormData } from "@/types/review";
 
 export default function ReviewForm() {
   const { restaurantId } = useParams();
@@ -70,10 +69,10 @@ export default function ReviewForm() {
       email: formData.get("email") as string,
       phone: formData.get("phone") as string || null,
       comment: formData.get("comment") as string,
-      source: 'form'
+      source: 'form' as const
     };
 
-    console.log("Submitting review with data:", reviewData);
+    console.log("Attempting to submit review with data:", reviewData);
 
     try {
       const { data, error } = await supabase
@@ -83,7 +82,7 @@ export default function ReviewForm() {
         .single();
 
       if (error) {
-        console.error("Error submitting review:", error);
+        console.error("Supabase error details:", error);
         toast({
           title: "Error",
           description: "Failed to submit review. Please try again.",
