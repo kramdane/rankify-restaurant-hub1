@@ -53,7 +53,7 @@ export function SocialMediaSection({ form }: SocialMediaSectionProps) {
                 <Input {...field} placeholder="https://tripadvisor.com/your-restaurant" />
               </FormControl>
               <FormMessage />
-            </Item>
+            </FormItem>
           )}
         />
       </CardContent>
