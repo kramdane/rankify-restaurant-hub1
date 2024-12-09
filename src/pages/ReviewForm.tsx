@@ -18,10 +18,12 @@ export default function ReviewForm() {
     queryFn: async () => {
       if (!restaurantId) throw new Error("Restaurant ID is required");
       
+      console.log("Fetching restaurant with ID:", restaurantId);
+      
       const { data, error } = await supabase
         .from("restaurants")
         .select("*")
-        .eq("id", restaurantId)
+        .eq("restaurant_id", restaurantId)
         .single();
 
       if (error) {
@@ -45,6 +47,8 @@ export default function ReviewForm() {
       console.error("Restaurant ID is missing");
       return;
     }
+
+    console.log("Submitting review for restaurant:", restaurantId);
 
     const { error } = await supabase
       .from("reviews")
