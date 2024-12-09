@@ -1,22 +1,56 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { TimeRange } from "./TimeRangeSelect";
+import { eachDayOfInterval, format, isWithinInterval } from "date-fns";
 
-// Mock data - replace with actual data from your backend
-const data = [
-  { date: "Mon", good: 4, bad: 1 },
-  { date: "Tue", good: 3, bad: 2 },
-  { date: "Wed", good: 7, bad: 0 },
-  { date: "Thu", good: 5, bad: 1 },
-  { date: "Fri", good: 6, bad: 2 },
-  { date: "Sat", good: 8, bad: 1 },
-  { date: "Sun", good: 4, bad: 0 },
-];
+interface ReviewsChartProps {
+  timeRange: TimeRange;
+  restaurantId?: number;
+}
 
-export const ReviewsChart = () => {
+export const ReviewsChart = ({ timeRange, restaurantId }: ReviewsChartProps) => {
+  const { data: reviews } = useQuery({
+    queryKey: ["reviews", restaurantId, timeRange],
+    queryFn: async () => {
+      if (!restaurantId) return [];
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("restaurant_id", restaurantId)
+        .gte("created_at", timeRange.start.toISOString())
+        .lte("created_at", timeRange.end.toISOString());
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!restaurantId,
+  });
+
+  const days = eachDayOfInterval({
+    start: timeRange.start,
+    end: timeRange.end,
+  });
+
+  const data = days.map(day => {
+    const dayReviews = reviews?.filter(review => 
+      isWithinInterval(new Date(review.created_at), {
+        start: new Date(format(day, 'yyyy-MM-dd')),
+        end: new Date(format(day, 'yyyy-MM-dd 23:59:59')),
+      })
+    ) || [];
+
+    return {
+      date: format(day, 'MMM dd'),
+      good: dayReviews.filter(review => review.rating >= 4).length,
+      bad: dayReviews.filter(review => review.rating < 4).length,
+    };
+  });
+
   return (
     <Card className="col-span-full">
       <CardHeader>
-        <CardTitle>Reviews Last 7 Days</CardTitle>
+        <CardTitle>Reviews Distribution</CardTitle>
       </CardHeader>
       <CardContent className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
