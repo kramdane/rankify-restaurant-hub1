@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { MessageSquare, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -12,6 +12,21 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const { data: restaurant } = useQuery({
+    queryKey: ["restaurant", restaurantId],
+    queryFn: async () => {
+      if (!restaurantId) return null;
+      const { data, error } = await supabase
+        .from("restaurants")
+        .select("*")
+        .eq("id", restaurantId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!restaurantId,
+  });
 
   const { data: reviews } = useQuery({
     queryKey: ["all-reviews", restaurantId],
@@ -28,11 +43,69 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
     enabled: !!restaurantId,
   });
 
+  useEffect(() => {
+    if (restaurant?.owner_name) {
+      setMessages([
+        {
+          role: "assistant",
+          content: `Hello ${restaurant.owner_name}! How can I help you today?`,
+        },
+      ]);
+    }
+  }, [restaurant?.owner_name]);
+
   const processQuestion = async (question: string) => {
     if (!reviews) return "I don't have access to your review data at the moment.";
 
     const questionLower = question.toLowerCase();
     
+    // Contact Information
+    if (questionLower.includes("phone number")) {
+      return restaurant?.phone 
+        ? `Your registered phone number is: ${restaurant.phone}`
+        : "I couldn't find your phone number in the records.";
+    }
+    
+    if (questionLower.includes("email address")) {
+      return restaurant?.email 
+        ? `Your registered email address is: ${restaurant.email}`
+        : "I couldn't find your email address in the records.";
+    }
+
+    // Most Active Reviewer
+    if (questionLower.includes("most review") || questionLower.includes("most active")) {
+      const reviewerCounts = reviews.reduce((acc: Record<string, number>, review) => {
+        acc[review.reviewer_name] = (acc[review.reviewer_name] || 0) + 1;
+        return acc;
+      }, {});
+      
+      const mostActiveReviewer = Object.entries(reviewerCounts).reduce((a, b) => 
+        b[1] > a[1] ? b : a
+      );
+      
+      return `${mostActiveReviewer[0]} is your most active reviewer with ${mostActiveReviewer[1]} reviews.`;
+    }
+
+    // Today's Average Rating
+    if (questionLower.includes("today")) {
+      const today = new Date();
+      const todayReviews = reviews.filter(review => {
+        const reviewDate = new Date(review.created_at);
+        return (
+          reviewDate.getDate() === today.getDate() &&
+          reviewDate.getMonth() === today.getMonth() &&
+          reviewDate.getFullYear() === today.getFullYear()
+        );
+      });
+
+      if (todayReviews.length === 0) {
+        return "There are no reviews yet for today.";
+      }
+
+      const averageRating = todayReviews.reduce((sum, review) => sum + review.rating, 0) / todayReviews.length;
+      return `Today's average rating is ${averageRating.toFixed(1)} stars from ${todayReviews.length} reviews.`;
+    }
+
     // Basic statistics
     if (questionLower.includes("average rating") || questionLower.includes("average score")) {
       const average = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
