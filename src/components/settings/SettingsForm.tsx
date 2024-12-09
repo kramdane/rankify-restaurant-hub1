@@ -1,32 +1,13 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-
-const formSchema = z.object({
-  name: z.string().min(2, "Restaurant name must be at least 2 characters"),
-  owner_name: z.string().min(2, "Owner name must be at least 2 characters"),
-  phone: z.string().optional(),
-  email: z.string().email("Invalid email address"),
-  address: z.string().min(5, "Address must be at least 5 characters"),
-  business_category: z.string().min(2, "Category must be at least 2 characters"),
-  facebook_url: z.string().url().optional().or(z.literal("")),
-  google_business_url: z.string().url().optional().or(z.literal("")),
-  tripadvisor_url: z.string().url().optional().or(z.literal("")),
-});
+import { BusinessInformationSection } from "./BusinessInformationSection";
+import { SocialMediaSection } from "./SocialMediaSection";
+import { settingsFormSchema, type SettingsFormValues } from "./settingsFormSchema";
 
 interface SettingsFormProps {
   userId: string;
@@ -35,8 +16,8 @@ interface SettingsFormProps {
 export function SettingsForm({ userId }: SettingsFormProps) {
   const queryClient = useQueryClient();
   
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<SettingsFormValues>({
+    resolver: zodResolver(settingsFormSchema),
     defaultValues: {
       name: "",
       owner_name: "",
@@ -50,7 +31,7 @@ export function SettingsForm({ userId }: SettingsFormProps) {
     },
   });
 
-  const { data: restaurant, isLoading } = useQuery({
+  const { isLoading } = useQuery({
     queryKey: ["restaurant", userId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -61,7 +42,6 @@ export function SettingsForm({ userId }: SettingsFormProps) {
 
       if (error) throw error;
       
-      // Set form values when data is loaded
       if (data) {
         form.reset(data);
       }
@@ -72,16 +52,18 @@ export function SettingsForm({ userId }: SettingsFormProps) {
   });
 
   const mutation = useMutation({
-    mutationFn: async (values: z.infer<typeof formSchema>) => {
-      // First check if a record exists
-      const { data: existingRestaurant } = await supabase
+    mutationFn: async (values: SettingsFormValues) => {
+      const { data: existingRestaurant, error: queryError } = await supabase
         .from("restaurants")
         .select("id")
         .eq("user_id", userId)
         .single();
 
+      if (queryError && queryError.code !== 'PGRST116') {
+        throw queryError;
+      }
+
       if (existingRestaurant) {
-        // Update existing record
         const { error } = await supabase
           .from("restaurants")
           .update(values)
@@ -89,7 +71,6 @@ export function SettingsForm({ userId }: SettingsFormProps) {
 
         if (error) throw error;
       } else {
-        // Insert new record
         const { error } = await supabase
           .from("restaurants")
           .insert([{ ...values, user_id: userId }]);
@@ -110,155 +91,15 @@ export function SettingsForm({ userId }: SettingsFormProps) {
     return <div>Loading...</div>;
   }
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: SettingsFormValues) => {
     mutation.mutate(values);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Business Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Restaurant Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="owner_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Owner/Manager Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email Address</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Business Address</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="business_category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Business Category</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="e.g., Italian, French, Café" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Social Media & Online Presence</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="facebook_url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Facebook Page Link</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="https://facebook.com/your-page" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="google_business_url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Google My Business Link</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="https://business.google.com/your-business" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="tripadvisor_url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tripadvisor Profile Link</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="https://tripadvisor.com/your-restaurant" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
-
+        <BusinessInformationSection form={form} />
+        <SocialMediaSection form={form} />
         <Button type="submit" className="w-full">
           Save Changes
         </Button>
