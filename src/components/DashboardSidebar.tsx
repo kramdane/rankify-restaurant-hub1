@@ -1,4 +1,4 @@
-import { LayoutDashboard, Menu, Star, MessageSquare, LogOut, Users } from "lucide-react";
+import { LayoutDashboard, Menu, Star, MessageSquare, LogOut, Users, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   Sidebar,
@@ -65,10 +65,17 @@ export function DashboardSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <div className="mt-auto p-4">
+        <div className="mt-auto p-4 space-y-2">
+          <button
+            onClick={() => navigate("/dashboard/settings")}
+            className="flex w-full items-center gap-2 text-gray-600 hover:text-primary transition-colors px-2 py-1.5 rounded-md"
+          >
+            <Settings className="h-5 w-5" />
+            <span>Settings</span>
+          </button>
           <button
             onClick={() => navigate("/login")}
-            className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors"
+            className="flex w-full items-center gap-2 text-gray-600 hover:text-primary transition-colors px-2 py-1.5 rounded-md"
           >
             <LogOut className="h-5 w-5" />
             <span>Sign Out</span>

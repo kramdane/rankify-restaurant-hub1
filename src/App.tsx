@@ -13,6 +13,7 @@ import Reviews from "./pages/Reviews";
 import ReviewForm from "./pages/ReviewForm";
 import Campaigns from "./pages/Campaigns";
 import NewCampaign from "./pages/NewCampaign";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/review/:restaurantId" element={<ReviewForm />} />
             <Route path="/dashboard/campaigns" element={<Campaigns />} />
             <Route path="/dashboard/campaigns/new" element={<NewCampaign />} />
+            <Route path="/dashboard/settings" element={<Settings />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
