@@ -3,6 +3,7 @@ import { OpenAI } from 'https://deno.land/x/openai@v4.24.0/mod.ts'
 import { corsHeaders } from '../_shared/cors.ts'
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -18,7 +19,11 @@ serve(async (req) => {
           isConfigured: true 
         }),
         {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store'
+          },
           status: 400,
         }
       )
@@ -35,7 +40,11 @@ serve(async (req) => {
           isConfigured: false 
         }),
         {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store'
+          },
           status: 500,
         }
       )
@@ -69,7 +78,11 @@ serve(async (req) => {
           isConfigured: true 
         }),
         {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store'
+          },
           status: 200,
         }
       )
@@ -82,7 +95,11 @@ serve(async (req) => {
           isConfigured: true
         }),
         {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store'
+          },
           status: 500,
         }
       )
@@ -97,7 +114,11 @@ serve(async (req) => {
         isConfigured: true
       }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store'
+        },
         status: 500,
       }
     )
