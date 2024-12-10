@@ -63,7 +63,7 @@ serve(async (req) => {
       );
     }
 
-    const reviewText = reviews.map(r => r.comment).join(' ');
+    const reviewText = reviews.map(r => r.comment).join('\n');
     const openai = new OpenAI({ apiKey: openAIApiKey });
 
     console.log('Calling OpenAI API for sentiment analysis');
@@ -74,14 +74,14 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "Analyze the reviews and extract key words with their sentiments. Return a JSON object with a 'words' array. Each word object should have: 'word' (string), 'sentiment' (string: 'positive', 'negative', or 'neutral'), and 'count' (number). Example: { \"words\": [{ \"word\": \"delicious\", \"sentiment\": \"positive\", \"count\": 3 }] }"
+            content: "You are a sentiment analysis assistant. Analyze the reviews and extract key words with their sentiments. Return a JSON object with a 'words' array. Each word object must have: 'word' (string), 'sentiment' (string: 'positive', 'negative', or 'neutral'), and 'count' (number). Example response format: { \"words\": [{ \"word\": \"delicious\", \"sentiment\": \"positive\", \"count\": 3 }] }. Only return valid JSON, no additional text or formatting."
           },
           {
             role: "user",
             content: reviewText
           }
         ],
-        temperature: 0.7,
+        temperature: 0.5,
         max_tokens: 1000,
         response_format: { type: "json_object" }
       });
@@ -90,7 +90,8 @@ serve(async (req) => {
       console.log('OpenAI API response received:', response);
 
       if (!response) {
-        throw new Error('No response from OpenAI');
+        console.error('No response content from OpenAI');
+        throw new Error('Empty response from OpenAI');
       }
 
       let analysis;
@@ -99,8 +100,18 @@ serve(async (req) => {
         console.log('Successfully parsed OpenAI response:', analysis);
         
         if (!analysis.words || !Array.isArray(analysis.words)) {
+          console.error('Invalid response structure:', analysis);
           throw new Error('Invalid response format from OpenAI');
         }
+
+        // Validate each word object
+        analysis.words.forEach((word: any, index: number) => {
+          if (!word.word || !word.sentiment || typeof word.count !== 'number') {
+            console.error(`Invalid word object at index ${index}:`, word);
+            throw new Error('Invalid word object structure');
+          }
+        });
+
       } catch (error) {
         console.error('Error parsing OpenAI response:', error);
         console.error('Raw response:', response);
