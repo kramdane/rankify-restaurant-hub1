@@ -10,7 +10,11 @@ CREATE TABLE IF NOT EXISTS messages (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Create the chat handling function with proper business logic
+-- Drop existing function if it exists to avoid conflicts
+DROP FUNCTION IF EXISTS handle_chat(TEXT);
+DROP FUNCTION IF EXISTS handle_chat(TEXT, UUID);
+
+-- Create a single handle_chat function with both parameters
 CREATE OR REPLACE FUNCTION handle_chat(
     message TEXT,
     restaurant_id UUID DEFAULT NULL
@@ -30,7 +34,6 @@ BEGIN
     RETURNING id INTO stored_message_id;
 
     -- Generate response based on the message content
-    -- This is a simple example; you can enhance this logic
     IF message ILIKE '%review%' THEN
         response := 'I can help you manage your reviews. Would you like to see recent reviews or analyze review trends?';
     ELSIF message ILIKE '%menu%' THEN
