@@ -60,7 +60,6 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
   const processSpecialCommands = async (question: string) => {
     const questionLower = question.toLowerCase();
     
-    // Contact Information for specific reviewer
     if (questionLower.includes("phone number of") || questionLower.includes("contact for")) {
       const nameMatch = question.match(/(?:of|for)\s+(.+?)(?:\s|$)/i);
       if (nameMatch && nameMatch[1]) {
@@ -74,7 +73,6 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
       return "Please specify the name of the reviewer you're asking about.";
     }
 
-    // Yesterday's reviews
     if (questionLower.includes("yesterday")) {
       const yesterdayReviews = getYesterdayReviews(reviews);
       if (yesterdayReviews.length === 0) {
@@ -93,7 +91,6 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
       return `Yesterday you received ${yesterdayReviews.length} reviews with an average rating of ${averageRating.toFixed(1)} stars.`;
     }
 
-    // If no special command matches, return null to use AI
     return null;
   };
 
@@ -124,7 +121,6 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
             },
-            mode: 'cors',
             body: JSON.stringify({
               message: userMessage,
               restaurantId,
