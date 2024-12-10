@@ -8,6 +8,7 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -15,24 +16,38 @@ serve(async (req) => {
   try {
     const { message, restaurantId, reviews } = await req.json()
 
+    // Validate required fields
+    if (!message) {
+      throw new Error('Message is required')
+    }
+
     // Create a Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
-    // Initialize OpenAI
+    // Initialize OpenAI with error handling
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!openaiApiKey) {
+      throw new Error('OpenAI API key not configured')
+    }
+
     const configuration = new Configuration({
-      apiKey: Deno.env.get('OPENAI_API_KEY'),
+      apiKey: openaiApiKey,
     })
     const openai = new OpenAIApi(configuration)
 
-    // Get restaurant data
-    const { data: restaurant } = await supabaseClient
+    // Get restaurant data with error handling
+    const { data: restaurant, error: restaurantError } = await supabaseClient
       .from('restaurants')
       .select('*')
       .eq('id', restaurantId)
       .single()
+
+    if (restaurantError) {
+      throw new Error(`Failed to fetch restaurant data: ${restaurantError.message}`)
+    }
 
     // Prepare context for the AI
     const context = `You are a helpful AI assistant for the restaurant "${restaurant?.name}". 
@@ -46,7 +61,9 @@ serve(async (req) => {
     
     Please provide helpful and friendly responses based on this context.`
 
-    // Get AI response
+    console.log('Sending request to OpenAI...')
+    
+    // Get AI response with error handling
     const completion = await openai.createChatCompletion({
       model: "gpt-4",
       messages: [
@@ -57,7 +74,11 @@ serve(async (req) => {
       max_tokens: 500,
     })
 
-    const aiResponse = completion.data.choices[0].message?.content || "I apologize, but I couldn't process that request."
+    if (!completion.data.choices[0].message?.content) {
+      throw new Error('No response received from OpenAI')
+    }
+
+    const aiResponse = completion.data.choices[0].message.content
 
     return new Response(
       JSON.stringify({ response: aiResponse }),
@@ -66,8 +87,13 @@ serve(async (req) => {
       },
     )
   } catch (error) {
+    console.error('Error in chat function:', error)
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+        details: error instanceof Error ? error.stack : undefined
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
