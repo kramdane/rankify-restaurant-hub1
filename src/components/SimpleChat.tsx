@@ -17,7 +17,7 @@ interface Message {
 export const SimpleChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const { sendMessage, isProcessing } = useChatApi();
 
   const { data: user } = useQuery({
@@ -78,7 +78,7 @@ export const SimpleChat = () => {
   if (!isOpen) {
     return (
       <Button
-        className="fixed bottom-4 right-4 h-12 w-12 rounded-full p-0 shadow-lg hover:shadow-xl transition-shadow"
+        className="fixed bottom-4 left-4 h-12 w-12 rounded-full p-0 shadow-lg hover:shadow-xl transition-shadow"
         onClick={() => setIsOpen(true)}
       >
         <MessageCircle className="h-6 w-6" />
@@ -87,7 +87,7 @@ export const SimpleChat = () => {
   }
 
   return (
-    <Card className="fixed bottom-4 right-4 w-full max-w-2xl p-4 bg-white shadow-lg">
+    <Card className="fixed bottom-4 left-4 w-full max-w-2xl p-4 bg-white shadow-lg">
       <Button
         variant="ghost"
         size="icon"
