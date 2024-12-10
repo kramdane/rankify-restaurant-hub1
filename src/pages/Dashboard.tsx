@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, MessageSquare, Menu as MenuIcon, TrendingUp } from "lucide-react";
 import { ReviewsChart } from "@/components/ReviewsChart";
 import { RecentReviews } from "@/components/RecentReviews";
+import { SimpleChat } from "@/components/SimpleChat";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { TimeRangeSelect, TimeRange } from "@/components/TimeRangeSelect";
@@ -157,6 +158,9 @@ const Dashboard = () => {
           <ReviewsChart timeRange={timeRange} restaurantId={restaurant?.id} />
           <RecentReviews restaurantId={restaurant?.id} />
         </div>
+      </div>
+      <div className="fixed bottom-4 right-4">
+        <SimpleChat />
       </div>
     </DashboardLayout>
   );
