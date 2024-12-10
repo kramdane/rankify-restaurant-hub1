@@ -3,13 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, MessageSquare, Menu as MenuIcon, TrendingUp } from "lucide-react";
 import { ReviewsChart } from "@/components/ReviewsChart";
 import { RecentReviews } from "@/components/RecentReviews";
-import { ChatBot } from "@/components/ChatBot";
+import { SimpleChat } from "@/components/SimpleChat";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { TimeRangeSelect, TimeRange } from "@/components/TimeRangeSelect";
 import { useState } from "react";
 import { addDays, startOfDay, endOfDay } from "date-fns";
-import { FloatingChatBot } from "@/components/FloatingChatBot";
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>({
