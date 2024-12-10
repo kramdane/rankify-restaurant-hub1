@@ -32,8 +32,6 @@ serve(async (req) => {
       )
     }
 
-    console.log('Sending message to OpenAI:', message)
-
     const completion = await openai.createChatCompletion({
       model: "gpt-4",
       messages: [
@@ -46,8 +44,6 @@ serve(async (req) => {
       temperature: 0.7,
       max_tokens: 500,
     })
-
-    console.log('Received response from OpenAI')
 
     const aiResponse = completion.data.choices[0].message?.content
     if (!aiResponse) {

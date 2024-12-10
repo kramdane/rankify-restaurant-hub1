@@ -7,8 +7,6 @@ export const useChatApi = () => {
   const sendMessage = async (message: string) => {
     setIsProcessing(true);
     try {
-      console.log('Sending message:', message);
-      
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -17,21 +15,16 @@ export const useChatApi = () => {
         body: JSON.stringify({ message }),
       });
 
-      console.log('Response status:', response.status);
-      const responseText = await response.text();
-      console.log('Raw response:', responseText);
-
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (e) {
-        console.error('Failed to parse response:', e);
-        throw new Error('Invalid JSON response from server');
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Response is not JSON');
       }
+
+      const data = await response.json();
 
       if (!data.response) {
         console.error('Invalid response format:', data);
