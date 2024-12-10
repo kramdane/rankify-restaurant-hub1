@@ -2,7 +2,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recha
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { TimeRange } from "./TimeRangeSelect";
-import { eachDayOfInterval, format, isWithinInterval } from "date-fns";
+import { eachDayOfInterval, format, parseISO, startOfDay, endOfDay } from "date-fns";
 
 interface ReviewsChartProps {
   timeRange: TimeRange;
@@ -33,13 +33,26 @@ export const ReviewsChart = ({ timeRange, restaurantId }: ReviewsChartProps) => 
     queryKey: ["reviews", restaurantId, timeRange],
     queryFn: async () => {
       if (!restaurantId) return [];
+      
+      // Format dates for Supabase query
+      const startDate = startOfDay(timeRange.start).toISOString();
+      const endDate = endOfDay(timeRange.end).toISOString();
+      
+      console.log('Fetching reviews between:', startDate, 'and', endDate);
+      
       const { data, error } = await supabase
         .from("reviews")
         .select("*")
         .eq("restaurant_id", restaurantId)
-        .gte("created_at", timeRange.start.toISOString())
-        .lte("created_at", timeRange.end.toISOString());
-      if (error) throw error;
+        .gte("created_at", startDate)
+        .lte("created_at", endDate);
+        
+      if (error) {
+        console.error('Error fetching reviews:', error);
+        throw error;
+      }
+      
+      console.log('Fetched reviews:', data);
       return data || [];
     },
     enabled: !!restaurantId,
@@ -51,12 +64,13 @@ export const ReviewsChart = ({ timeRange, restaurantId }: ReviewsChartProps) => 
   });
 
   const data = days.map(day => {
-    const dayReviews = reviews?.filter(review => 
-      isWithinInterval(new Date(review.created_at), {
-        start: new Date(format(day, 'yyyy-MM-dd')),
-        end: new Date(format(day, 'yyyy-MM-dd 23:59:59')),
-      })
-    ) || [];
+    const dayStart = startOfDay(day).toISOString();
+    const dayEnd = endOfDay(day).toISOString();
+    
+    const dayReviews = reviews?.filter(review => {
+      const reviewDate = parseISO(review.created_at);
+      return reviewDate >= parseISO(dayStart) && reviewDate <= parseISO(dayEnd);
+    }) || [];
 
     return {
       date: format(day, 'MMM dd'),
