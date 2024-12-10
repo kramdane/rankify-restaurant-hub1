@@ -4,7 +4,7 @@ import { Configuration, OpenAIApi } from "https://esm.sh/openai@3.1.0"
 import { corsHeaders, handleCors } from '../_shared/cors.ts'
 
 serve(async (req) => {
-  // Handle CORS preflight
+  // Handle CORS preflight requests
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
 
