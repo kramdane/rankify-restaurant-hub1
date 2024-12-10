@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 
 export const useChatApi = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -8,19 +9,16 @@ export const useChatApi = () => {
     setIsProcessing(true);
     
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message }),
+      const { data, error } = await supabase.functions.invoke('chat', {
+        body: { message }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) throw error;
+      
+      if (!data?.response) {
+        throw new Error('No response received from the chat service');
       }
 
-      const data = await response.json();
       return data.response;
     } catch (error) {
       console.error('Error in sendMessage:', error);

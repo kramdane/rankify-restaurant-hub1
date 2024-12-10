@@ -15,7 +15,7 @@ serve(async (req) => {
 
   try {
     const { message } = await req.json();
-
+    
     if (!message) {
       return new Response(
         JSON.stringify({ error: 'Message is required' }),
@@ -26,8 +26,8 @@ serve(async (req) => {
       );
     }
 
-    const apiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!apiKey) {
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAIApiKey) {
       return new Response(
         JSON.stringify({ error: 'OpenAI API key not configured' }),
         {
@@ -37,14 +37,14 @@ serve(async (req) => {
       );
     }
 
-    const openai = new OpenAI({ apiKey });
+    const openai = new OpenAI({ apiKey: openAIApiKey });
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content: "You are a helpful assistant that helps users with their questions."
+          content: "You are a helpful restaurant management assistant. Help users with their restaurant-related questions and tasks."
         },
         {
           role: "user",
@@ -65,7 +65,6 @@ serve(async (req) => {
       JSON.stringify({ response }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
       }
     );
 
