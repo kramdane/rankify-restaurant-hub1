@@ -27,7 +27,7 @@ export default function ReviewForm() {
       const { data, error } = await supabase
         .from("restaurants")
         .select("*")
-        .eq("id", restaurantId) // Changed from user_id to id
+        .eq("id", restaurantId)
         .single();
 
       if (error) {
@@ -109,6 +109,18 @@ export default function ReviewForm() {
       });
     }
   };
+
+  if (isLoadingRestaurant) {
+    return (
+      <div className="min-h-screen bg-[#F6FAFF] flex items-center justify-center p-6">
+        <Card className="w-full max-w-2xl bg-white shadow-lg">
+          <CardContent className="p-6">
+            <div className="text-center">Loading...</div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!restaurant) {
     return (
