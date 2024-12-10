@@ -112,17 +112,21 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
           { role: "assistant", content: specialResponse },
         ]);
       } else {
-        console.log("Sending request to AI endpoint...");
+        const headers = {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Origin': window.location.origin,
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
+        };
+        
+        console.log('Request headers:', headers);
+        console.log('VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY);
+        
         const response = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`,
           {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-              'Origin': window.location.origin,
-              'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
-            },
+            headers,
             credentials: 'include',
             body: JSON.stringify({
               message: userMessage,

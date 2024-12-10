@@ -8,11 +8,22 @@ serve(async (req) => {
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
 
+  // Log all headers for debugging
+  console.log('Received headers:', Object.fromEntries(req.headers.entries()));
+
   // Verify authorization
   const authHeader = req.headers.get('Authorization');
-  if (!authHeader) {
+  const apiKey = req.headers.get('apikey');
+  
+  console.log('Auth header:', authHeader);
+  console.log('API key:', apiKey);
+
+  if (!authHeader || !apiKey) {
     return new Response(
-      JSON.stringify({ error: 'Missing authorization header' }),
+      JSON.stringify({ 
+        error: 'Missing authorization header or API key',
+        receivedHeaders: Object.fromEntries(req.headers.entries())
+      }),
       { 
         headers: { 
           ...corsHeaders,
@@ -34,7 +45,14 @@ serve(async (req) => {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
+      { 
+        global: { 
+          headers: { 
+            Authorization: authHeader,
+            apikey: apiKey
+          } 
+        } 
+      }
     )
 
     // Initialize OpenAI
