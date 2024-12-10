@@ -358,6 +358,7 @@ export type Database = {
       customer_reviews: {
         Row: {
           average_rating: number | null
+          contact_identifier: string | null
           email: string | null
           last_review_date: string | null
           phone: string | null
