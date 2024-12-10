@@ -81,7 +81,10 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ response: aiResponse }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+        },
         status: 200 
       },
     )
@@ -95,7 +98,10 @@ serve(async (req) => {
         details: error instanceof Error ? error.stack : undefined
       }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        },
         status: 500 
       },
     )
