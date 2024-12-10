@@ -15,38 +15,51 @@ const ContactPage = () => {
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["contacts"],
     queryFn: async () => {
-      const { data: contactsData, error: contactsError } = await supabase
-        .from("contacts")
-        .select("*")
-        .order("created_at", { ascending: false });
+      // Get the current user's restaurant ID first
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
 
-      if (contactsError) {
-        toast.error("Failed to load contacts");
-        throw contactsError;
+      const { data: restaurant, error: restaurantError } = await supabase
+        .from("restaurants")
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (restaurantError) {
+        toast.error("Failed to load restaurant data");
+        throw restaurantError;
       }
 
-      // Fetch customer reviews separately and merge with contacts
+      // Now fetch customer reviews for this restaurant
       const { data: customerReviews, error: reviewsError } = await supabase
         .from("customer_reviews")
-        .select("*");
+        .select("*")
+        .eq("restaurant_id", restaurant.id);
 
       if (reviewsError) {
-        toast.error("Failed to load reviews");
+        toast.error("Failed to load customer reviews");
         throw reviewsError;
       }
 
-      // Map customer reviews to contacts
-      const contactsWithReviews = contactsData.map((contact) => {
-        const reviews = customerReviews.filter(
-          (review) => review.email === contact.email
-        );
-        return {
-          ...contact,
-          customer_reviews: reviews.length > 0 ? reviews : null,
-        };
-      });
+      // Transform the data to match the Contact type
+      const contacts = customerReviews.map(review => ({
+        id: review.review_ids?.[0] || '', // Using first review ID as contact ID
+        firstname: review.reviewer_name?.split(' ')[0] || '',
+        lastname: review.reviewer_name?.split(' ')[1] || '',
+        email: review.email || '',
+        phone: review.phone || '',
+        addeddate: review.last_review_date || new Date().toISOString(),
+        reviewcount: review.review_count || 0,
+        created_at: review.last_review_date || null,
+        updated_at: review.last_review_date || null,
+        customer_reviews: [{
+          average_rating: review.average_rating || 0,
+          review_count: review.review_count || 0,
+          review_ids: review.review_ids || [],
+        }]
+      }));
 
-      return contactsWithReviews as Contact[];
+      return contacts as Contact[];
     },
   });
 
@@ -56,18 +69,10 @@ const ContactPage = () => {
     queryFn: async () => {
       if (!selectedContact?.email) return [];
       
-      const { data: customerReview } = await supabase
-        .from("customer_reviews")
-        .select("review_ids")
-        .eq("email", selectedContact.email)
-        .single();
-
-      if (!customerReview?.review_ids?.length) return [];
-
       const { data: reviews, error } = await supabase
         .from("reviews")
         .select("*")
-        .in("id", customerReview.review_ids);
+        .in("id", selectedContact.customer_reviews?.[0]?.review_ids || []);
 
       if (error) {
         toast.error("Failed to load review details");
