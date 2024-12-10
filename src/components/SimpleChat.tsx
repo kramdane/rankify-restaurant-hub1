@@ -124,7 +124,7 @@ export const SimpleChat = () => {
               <div
                 className={`max-w-[80%] p-3 rounded-lg ${
                   message.role === "assistant"
-                    ? "bg-secondary"
+                    ? "bg-secondary text-white"
                     : "bg-primary text-primary-foreground"
                 }`}
               >
