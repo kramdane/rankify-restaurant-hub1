@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Star } from "lucide-react";
+import { Download, Star, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -17,54 +17,78 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
-// Mock data - replace with actual data from your backend
-const contacts = [
-  {
-    id: 1,
-    firstName: "John",
-    lastName: "Doe",
-    phone: "+1 234-567-8900",
-    email: "john.doe@example.com",
-    addedDate: "2024-03-01",
-    reviewCount: 3,
-    reviews: [
-      { id: 1, rating: 5, comment: "Great experience!", date: "2024-03-01" },
-      { id: 2, rating: 4, comment: "Good service overall", date: "2024-02-15" },
-      { id: 3, rating: 3, comment: "Average experience", date: "2024-02-01" },
-    ],
-  },
-  {
-    id: 2,
-    firstName: "Jane",
-    lastName: "Smith",
-    phone: "+1 234-567-8901",
-    email: "jane.smith@example.com",
-    addedDate: "2024-03-02",
-    reviewCount: 5,
-    reviews: [
-      { id: 4, rating: 5, comment: "Excellent service!", date: "2024-03-02" },
-      { id: 5, rating: 5, comment: "Amazing food!", date: "2024-02-20" },
-      { id: 6, rating: 4, comment: "Very good experience", date: "2024-02-10" },
-      { id: 7, rating: 5, comment: "Will come back!", date: "2024-01-30" },
-      { id: 8, rating: 4, comment: "Friendly staff", date: "2024-01-15" },
-    ],
-  },
-];
+interface Contact {
+  id: string;
+  firstname: string;
+  lastname: string;
+  phone: string;
+  email: string;
+  addeddate: string;
+  reviewcount: number;
+}
+
+interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+}
 
 const Contact = () => {
-  const [selectedContact, setSelectedContact] = useState<typeof contacts[0] | null>(null);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+
+  const { data: contacts, isLoading } = useQuery({
+    queryKey: ["contacts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contacts")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        toast.error("Failed to load contacts");
+        throw error;
+      }
+
+      return data as Contact[];
+    },
+  });
+
+  const { data: selectedContactReviews } = useQuery({
+    queryKey: ["contact-reviews", selectedContact?.id],
+    enabled: !!selectedContact,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("id, rating, comment, created_at")
+        .eq("email", selectedContact?.email)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        toast.error("Failed to load reviews");
+        throw error;
+      }
+
+      return data as Review[];
+    },
+  });
 
   const handleExportCSV = () => {
+    if (!contacts) return;
+
     const headers = ["First Name", "Last Name", "Phone", "Email", "Added Date", "Review Count", "Average Rating"];
     const csvData = contacts.map((contact) => [
-      contact.firstName,
-      contact.lastName,
-      contact.phone,
-      contact.email,
-      contact.addedDate,
-      contact.reviewCount,
-      calculateAverageRating(contact.reviews),
+      contact.firstname,
+      contact.lastname,
+      contact.phone || "",
+      contact.email || "",
+      new Date(contact.addeddate).toLocaleDateString(),
+      contact.reviewcount || 0,
+      calculateAverageRating(selectedContactReviews || []),
     ]);
 
     const csvContent = [
@@ -83,11 +107,21 @@ const Contact = () => {
     document.body.removeChild(link);
   };
 
-  const calculateAverageRating = (reviews: typeof selectedContact.reviews) => {
+  const calculateAverageRating = (reviews: Review[]) => {
     if (!reviews || reviews.length === 0) return 0;
     const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
     return (sum / reviews.length).toFixed(1);
   };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -116,22 +150,22 @@ const Contact = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {contacts.map((contact) => (
+                {contacts?.map((contact) => (
                   <TableRow key={contact.id}>
                     <TableCell>
                       <button
                         onClick={() => setSelectedContact(contact)}
                         className="text-primary hover:underline focus:outline-none"
                       >
-                        {contact.firstName} {contact.lastName}
+                        {contact.firstname} {contact.lastname}
                       </button>
                     </TableCell>
-                    <TableCell>{contact.phone}</TableCell>
-                    <TableCell>{contact.email}</TableCell>
-                    <TableCell>{new Date(contact.addedDate).toLocaleDateString()}</TableCell>
-                    <TableCell>{contact.reviewCount}</TableCell>
+                    <TableCell>{contact.phone || "-"}</TableCell>
+                    <TableCell>{contact.email || "-"}</TableCell>
+                    <TableCell>{new Date(contact.addeddate).toLocaleDateString()}</TableCell>
+                    <TableCell>{contact.reviewcount || 0}</TableCell>
                     <TableCell className="flex items-center gap-1">
-                      {calculateAverageRating(contact.reviews)}
+                      {calculateAverageRating(selectedContactReviews || [])}
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     </TableCell>
                   </TableRow>
@@ -146,7 +180,7 @@ const Contact = () => {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              Reviews by {selectedContact?.firstName} {selectedContact?.lastName}
+              Reviews by {selectedContact?.firstname} {selectedContact?.lastname}
             </DialogTitle>
           </DialogHeader>
           {selectedContact && (
@@ -155,13 +189,13 @@ const Contact = () => {
                 <span>Average Rating:</span>
                 <div className="flex items-center gap-1">
                   <span className="font-bold">
-                    {calculateAverageRating(selectedContact.reviews)}
+                    {calculateAverageRating(selectedContactReviews || [])}
                   </span>
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                 </div>
               </div>
               <div className="space-y-4">
-                {selectedContact.reviews.map((review) => (
+                {selectedContactReviews?.map((review) => (
                   <Card key={review.id}>
                     <CardContent className="pt-6">
                       <div className="flex justify-between items-start">
@@ -177,7 +211,7 @@ const Contact = () => {
                           <p className="text-gray-600">{review.comment}</p>
                         </div>
                         <span className="text-sm text-gray-500">
-                          {new Date(review.date).toLocaleDateString()}
+                          {new Date(review.created_at).toLocaleDateString()}
                         </span>
                       </div>
                     </CardContent>
