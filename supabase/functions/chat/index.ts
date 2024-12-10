@@ -19,11 +19,11 @@ serve(async (req) => {
           isConfigured: false 
         }),
         {
-          status: 500,
           headers: {
             ...corsHeaders,
             'Content-Type': 'application/json',
           },
+          status: 500,
         }
       )
     }
@@ -36,7 +36,7 @@ serve(async (req) => {
     
     // Create chat completion
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-mini",
       messages: [
         {"role": "system", "content": "You are a helpful restaurant assistant. You help with reviews, menu management, and customer service."},
         {"role": "user", "content": message}
@@ -72,11 +72,11 @@ serve(async (req) => {
         details: 'An error occurred while processing your request'
       }),
       {
-        status: 500,
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json',
         },
+        status: 500,
       },
     )
   }
