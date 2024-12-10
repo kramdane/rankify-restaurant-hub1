@@ -17,9 +17,11 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting analyze-reviews function');
     const supabase = createClient(supabaseUrl!, supabaseServiceRoleKey!);
     const { restaurantId } = await req.json();
 
+    console.log('Fetching reviews for restaurant:', restaurantId);
     // Fetch reviews for the restaurant
     const { data: reviews, error: reviewsError } = await supabase
       .from('reviews')
@@ -27,11 +29,23 @@ serve(async (req) => {
       .eq('restaurant_id', restaurantId)
       .not('comment', 'is', null);
 
-    if (reviewsError) throw reviewsError;
+    if (reviewsError) {
+      console.error('Error fetching reviews:', reviewsError);
+      throw reviewsError;
+    }
+
+    console.log(`Found ${reviews.length} reviews`);
+    
+    if (reviews.length === 0) {
+      return new Response(JSON.stringify({ words: [] }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Combine all reviews into a single text
     const reviewText = reviews.map(r => r.comment).join(' ');
 
+    console.log('Calling OpenAI API for sentiment analysis');
     // Use OpenAI to analyze the sentiment
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -40,7 +54,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-3.5-turbo',
         messages: [
           {
             role: 'system',
@@ -55,7 +69,15 @@ serve(async (req) => {
     });
 
     const data = await response.json();
+    console.log('OpenAI API response:', data);
+
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Invalid response from OpenAI:', data);
+      throw new Error('Invalid response from OpenAI');
+    }
+
     const analysis = JSON.parse(data.choices[0].message.content);
+    console.log('Parsed analysis:', analysis);
 
     return new Response(JSON.stringify({ words: analysis }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
