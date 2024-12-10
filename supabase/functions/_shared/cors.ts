@@ -1,7 +1,7 @@
 const ALLOWED_ORIGINS = [
   'https://preview--rankify-restaurant-hub.lovable.app',
   'https://rankify-restaurant-hub.lovable.app',
-  'http://localhost:8080', // For local development
+  'http://localhost:8080',
 ];
 
 export const corsHeaders = {
@@ -13,17 +13,15 @@ export const corsHeaders = {
 
 export function handleCors(req: Request) {
   const origin = req.headers.get('Origin') || '';
-  const isAllowedOrigin = ALLOWED_ORIGINS.includes(origin);
-
+  
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       headers: {
         ...corsHeaders,
-        'Access-Control-Allow-Origin': isAllowedOrigin ? origin : ALLOWED_ORIGINS[0],
+        'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0],
       },
     });
   }
 
-  // For non-OPTIONS requests, return null but the calling function should use corsHeaders
   return null;
 }

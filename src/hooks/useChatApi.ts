@@ -17,15 +17,19 @@ export const useChatApi = ({ restaurantId, reviews }: UseChatApiProps) => {
         ? '/api/chat'
         : `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      // Add authorization headers only in production
+      if (!import.meta.env.DEV) {
+        headers['Authorization'] = `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`;
+        headers['apikey'] = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      }
+
       const response = await fetch(baseUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(import.meta.env.PROD && {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
-          })
-        },
+        headers,
         body: JSON.stringify({
           message,
           restaurantId,
