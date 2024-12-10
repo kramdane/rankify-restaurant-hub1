@@ -31,16 +31,8 @@ export const useChatApi = ({ restaurantId, reviews }: UseChatApiProps) => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
-        console.error('Invalid content type:', contentType);
-        console.error('Response text:', text);
-        throw new Error('Server did not return JSON');
-      }
-
       const data = await response.json();
-
+      
       if (!data.response) {
         console.error('Invalid response format:', data);
         throw new Error('Invalid response format');
