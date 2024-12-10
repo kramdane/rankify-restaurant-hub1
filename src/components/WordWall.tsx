@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2, Search, RefreshCw } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { supabase } from "@/lib/supabase";
 import {
   Select,
   SelectContent,
@@ -16,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { toast } from "sonner";
 
 interface Word {
   word: string;
@@ -39,19 +41,27 @@ export const WordWall = ({ restaurantId }: { restaurantId?: string }) => {
   const [filter, setFilter] = useState<"all" | "positive" | "negative" | "neutral">("all");
   const [search, setSearch] = useState("");
 
-  const { data: words, isLoading, refetch } = useQuery({
+  const { data: words, isLoading, refetch, error } = useQuery({
     queryKey: ["word-wall", restaurantId],
     queryFn: async () => {
-      const response = await fetch("/functions/v1/analyze-reviews", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ restaurantId }),
-      });
-      if (!response.ok) throw new Error("Failed to analyze reviews");
-      const data = await response.json();
-      return data.words as Word[];
+      console.log("Analyzing reviews for restaurant:", restaurantId);
+      try {
+        const { data, error } = await supabase.functions.invoke("analyze-reviews", {
+          body: { restaurantId },
+        });
+
+        if (error) {
+          console.error("Error from analyze-reviews function:", error);
+          throw error;
+        }
+
+        console.log("Received analysis data:", data);
+        return data.words as Word[];
+      } catch (error) {
+        console.error("Error in word wall query:", error);
+        toast.error("Failed to analyze reviews. Please try again.");
+        throw error;
+      }
     },
     enabled: !!restaurantId,
   });
@@ -61,6 +71,10 @@ export const WordWall = ({ restaurantId }: { restaurantId?: string }) => {
     const matchesSearch = word.word.toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+
+  if (error) {
+    console.error("Error in WordWall:", error);
+  }
 
   return (
     <div className="space-y-4">
