@@ -14,33 +14,44 @@ import ReviewForm from "./pages/ReviewForm";
 import Campaigns from "./pages/Campaigns";
 import NewCampaign from "./pages/NewCampaign";
 import Settings from "./pages/Settings";
+import { useState } from "react";
 
-const queryClient = new QueryClient();
+const App = () => {
+  // Move queryClient inside the component and use useState to maintain its instance
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        retry: 1,
+      },
+    },
+  }));
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/menu" element={<Menu />} />
-            <Route path="/dashboard/contact" element={<Contact />} />
-            <Route path="/dashboard/reviews" element={<Reviews />} />
-            <Route path="/review/:restaurantId" element={<ReviewForm />} />
-            <Route path="/dashboard/campaigns" element={<Campaigns />} />
-            <Route path="/dashboard/campaigns/new" element={<NewCampaign />} />
-            <Route path="/dashboard/settings" element={<Settings />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <Toaster />
+            <Sonner />
+            <Routes>
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/menu" element={<Menu />} />
+              <Route path="/dashboard/contact" element={<Contact />} />
+              <Route path="/dashboard/reviews" element={<Reviews />} />
+              <Route path="/review/:restaurantId" element={<ReviewForm />} />
+              <Route path="/dashboard/campaigns" element={<Campaigns />} />
+              <Route path="/dashboard/campaigns/new" element={<NewCampaign />} />
+              <Route path="/dashboard/settings" element={<Settings />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
