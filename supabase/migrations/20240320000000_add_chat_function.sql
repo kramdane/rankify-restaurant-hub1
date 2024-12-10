@@ -1,5 +1,9 @@
--- Create a type for message roles
-CREATE TYPE message_role AS ENUM ('user', 'assistant');
+-- Create a type for message roles if it doesn't exist
+DO $$ BEGIN
+    CREATE TYPE message_role AS ENUM ('user', 'assistant');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Create a messages table to store chat history
 CREATE TABLE IF NOT EXISTS messages (
