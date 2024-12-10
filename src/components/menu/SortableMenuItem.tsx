@@ -36,12 +36,10 @@ export const SortableMenuItem = ({ item }: SortableMenuItemProps) => {
       ref={setNodeRef} 
       style={style} 
       {...attributes}
+      {...listeners}
       className="cursor-grab active:cursor-grabbing"
     >
-      <div 
-        {...listeners}
-        className="flex justify-between items-start border-b pb-4 last:border-0 hover:bg-gray-50 rounded-lg p-3 transition-colors"
-      >
+      <div className="flex justify-between items-start border-b pb-4 last:border-0 hover:bg-gray-50 rounded-lg p-3 transition-colors">
         <div className="space-y-1 flex-1">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
