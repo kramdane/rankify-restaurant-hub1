@@ -8,11 +8,13 @@ import { MessageBubble } from "./chat/MessageBubble";
 import { ChatInput } from "./chat/ChatInput";
 import { type Message } from "./chat/types";
 import { exportReviews, getYesterdayReviews, getReviewerContact } from "@/utils/chatBotUtils";
+import { useToast } from "@/hooks/use-toast";
 
 export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
 
   const { data: restaurant } = useQuery({
     queryKey: ["restaurant", restaurantId],
@@ -114,7 +116,7 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
           { role: "assistant", content: specialResponse },
         ]);
       } else {
-        // If no special command matches, use AI
+        console.log("Sending request to AI endpoint...");
         const response = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`,
           {
@@ -131,7 +133,9 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
           }
         );
 
+        console.log("Response status:", response.status);
         const data = await response.json();
+        console.log("Response data:", data);
         
         if (response.ok) {
           setMessages((prev) => [
@@ -144,6 +148,11 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
       }
     } catch (error) {
       console.error("Error processing message:", error);
+      toast({
+        title: "Error",
+        description: "There was an error processing your message. Please try again.",
+        variant: "destructive",
+      });
       setMessages((prev) => [
         ...prev,
         {
