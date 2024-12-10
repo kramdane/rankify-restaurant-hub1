@@ -11,7 +11,7 @@ const configuration = new Configuration({ apiKey: OPENAI_API_KEY })
 const openai = new OpenAIApi(configuration)
 
 serve(async (req) => {
-  // Handle CORS
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
