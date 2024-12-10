@@ -74,7 +74,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "Extract key words and phrases from the reviews and classify their sentiment. Return a JSON array where each item has: word (string), sentiment (positive, negative, or neutral), count (number of occurrences), and reviews (array of full review objects that contain this word). Focus on meaningful words and ignore common stop words. Format the response as a valid JSON array."
+            content: "You are a sentiment analysis assistant. Extract key words and phrases from the reviews and classify their sentiment. Return a JSON array where each object has these exact properties: word (string), sentiment (one of: positive, negative, or neutral), count (number). Format your response as a plain JSON array, with no markdown formatting or explanation text."
           },
           {
             role: "user",
@@ -82,11 +82,12 @@ serve(async (req) => {
           }
         ],
         temperature: 0.7,
-        max_tokens: 1000
+        max_tokens: 1000,
+        response_format: { type: "json_object" } // Ensure JSON response
       });
 
       const response = completion.choices[0]?.message?.content;
-      console.log('OpenAI API response received');
+      console.log('OpenAI API response received:', response);
 
       if (!response) {
         throw new Error('No response from OpenAI');
@@ -94,15 +95,18 @@ serve(async (req) => {
 
       let analysis;
       try {
-        analysis = JSON.parse(response);
+        // Clean the response string before parsing
+        const cleanResponse = response.replace(/```json\n?|\n?```/g, '').trim();
+        analysis = JSON.parse(cleanResponse);
         console.log('Successfully parsed OpenAI response');
       } catch (error) {
         console.error('Error parsing OpenAI response:', error);
+        console.error('Raw response:', response);
         throw new Error('Failed to parse OpenAI response');
       }
 
       // Add the full review objects to each word's reviews array
-      analysis = analysis.map((word: any) => ({
+      const wordsWithReviews = analysis.words.map((word: any) => ({
         ...word,
         reviews: reviews.filter(review => 
           review.comment.toLowerCase().includes(word.word.toLowerCase())
@@ -110,7 +114,7 @@ serve(async (req) => {
       }));
 
       return new Response(
-        JSON.stringify({ words: analysis }),
+        JSON.stringify({ words: wordsWithReviews }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 200
