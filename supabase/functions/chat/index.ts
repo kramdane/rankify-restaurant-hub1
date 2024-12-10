@@ -2,6 +2,14 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { Configuration, OpenAIApi } from "https://esm.sh/openai@3.1.0"
 import { corsHeaders } from '../_shared/cors.ts'
 
+const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
+if (!OPENAI_API_KEY) {
+  throw new Error('OPENAI_API_KEY is required')
+}
+
+const configuration = new Configuration({ apiKey: OPENAI_API_KEY })
+const openai = new OpenAIApi(configuration)
+
 serve(async (req) => {
   // Handle CORS
   if (req.method === 'OPTIONS') {
@@ -14,15 +22,6 @@ serve(async (req) => {
     if (!message) {
       throw new Error('Message is required')
     }
-
-    // Get OpenAI API key from environment variable
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
-    if (!openaiApiKey) {
-      throw new Error('OpenAI API key not configured')
-    }
-
-    const configuration = new Configuration({ apiKey: openaiApiKey })
-    const openai = new OpenAIApi(configuration)
 
     // Create a system message that includes context about the restaurant and reviews
     const systemMessage = `You are a helpful AI assistant for a restaurant${
@@ -46,7 +45,12 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ response: aiResponse }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        } 
+      }
     )
   } catch (error) {
     console.error('Error in Edge Function:', error)
@@ -56,7 +60,10 @@ serve(async (req) => {
         error: error instanceof Error ? error.message : 'An unexpected error occurred'
       }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        },
         status: 500 
       }
     )
