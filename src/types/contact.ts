@@ -6,4 +6,9 @@ export interface Contact {
   email: string | null;
   addeddate: string;
   reviewcount: number;
+  customer_reviews?: {
+    review_count: number;
+    average_rating: number;
+    review_ids: string[];
+  } | null;
 }

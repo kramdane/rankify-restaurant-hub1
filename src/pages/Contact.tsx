@@ -17,7 +17,14 @@ const ContactPage = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("contacts")
-        .select("*")
+        .select(`
+          *,
+          customer_reviews (
+            review_count,
+            average_rating,
+            review_ids
+          )
+        `)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -33,32 +40,27 @@ const ContactPage = () => {
     queryKey: ["contact-reviews", selectedContact?.email],
     enabled: !!selectedContact?.email,
     queryFn: async () => {
-      const { data, error } = await supabase
+      if (!selectedContact?.email) return [];
+      
+      const { data: reviewIds } = await supabase
         .from("customer_reviews")
-        .select("*")
-        .eq("email", selectedContact?.email)
+        .select("review_ids")
+        .eq("email", selectedContact.email)
         .single();
 
-      if (error && error.code !== "PGRST116") {
-        toast.error("Failed to load reviews");
+      if (!reviewIds?.review_ids?.length) return [];
+
+      const { data: reviews, error } = await supabase
+        .from("reviews")
+        .select("*")
+        .in("id", reviewIds.review_ids);
+
+      if (error) {
+        toast.error("Failed to load review details");
         throw error;
       }
 
-      if (data) {
-        const { data: reviewDetails, error: reviewError } = await supabase
-          .from("reviews")
-          .select("*")
-          .in("id", data.review_ids);
-
-        if (reviewError) {
-          toast.error("Failed to load review details");
-          throw reviewError;
-        }
-
-        return reviewDetails;
-      }
-
-      return [];
+      return reviews || [];
     },
   });
 
