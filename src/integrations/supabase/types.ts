@@ -157,6 +157,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          position: number | null
           price: number
           restaurant_id: string
           updated_at: string | null
@@ -168,6 +169,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          position?: number | null
           price: number
           restaurant_id: string
           updated_at?: string | null
@@ -179,6 +181,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          position?: number | null
           price?: number
           restaurant_id?: string
           updated_at?: string | null

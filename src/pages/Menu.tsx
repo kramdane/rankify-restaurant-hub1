@@ -1,28 +1,14 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Share2, GripVertical } from "lucide-react";
+import { Plus, Share2 } from "lucide-react";
 import { useState } from "react";
 import { MenuForm } from "@/components/MenuForm";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { arrayMove } from "@dnd-kit/sortable";
+import { MenuCategory } from "@/components/menu/MenuCategory";
 
 interface MenuItem {
   id: string;
@@ -33,52 +19,10 @@ interface MenuItem {
   position?: number;
 }
 
-const SortableMenuItem = ({ item }: { item: MenuItem }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({ id: item.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
-  return (
-    <div ref={setNodeRef} style={style} {...attributes}>
-      <div className="flex justify-between items-start border-b pb-4 last:border-0">
-        <div className="space-y-1 flex-1">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <button {...listeners} className="cursor-grab hover:cursor-grabbing p-1">
-                <GripVertical className="h-4 w-4 text-gray-400" />
-              </button>
-              <h3 className="text-lg font-semibold">{item.name}</h3>
-            </div>
-            <span className="font-semibold">${item.price.toFixed(2)}</span>
-          </div>
-          <p className="text-muted-foreground text-sm" style={{ fontSize: "0.8em" }}>
-            {item.description}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const Menu = () => {
   const [showForm, setShowForm] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
 
   const { data: restaurant } = useQuery({
     queryKey: ["restaurant"],
@@ -97,7 +41,7 @@ const Menu = () => {
     },
   });
 
-  const { data: menuItems = [] } = useQuery({
+  const { data: menuItems = [] } = useQuery<MenuItem[]>({
     queryKey: ["menuItems", restaurant?.id],
     queryFn: async () => {
       if (!restaurant?.id) return [];
@@ -216,7 +160,7 @@ const Menu = () => {
           </div>
         </div>
 
-        {showForm ? (
+        {showForm && (
           <Card className="bg-white shadow-sm">
             <CardHeader>
               <CardTitle>Add New Menu Item</CardTitle>
@@ -225,33 +169,16 @@ const Menu = () => {
               <MenuForm onSubmit={handleAddItem} onCancel={() => setShowForm(false)} />
             </CardContent>
           </Card>
-        ) : null}
+        )}
 
         <div className="space-y-8">
           {Object.entries(groupedMenuItems).map(([category, items]) => (
-            <Card key={category} className="bg-white shadow-sm">
-              <CardHeader>
-                <CardTitle>{category}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext
-                    items={items.map(item => item.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <div className="space-y-6">
-                      {items.map((item) => (
-                        <SortableMenuItem key={item.id} item={item} />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              </CardContent>
-            </Card>
+            <MenuCategory
+              key={category}
+              category={category}
+              items={items}
+              onDragEnd={handleDragEnd}
+            />
           ))}
         </div>
       </div>
