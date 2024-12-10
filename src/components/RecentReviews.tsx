@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Star } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -25,39 +24,51 @@ export const RecentReviews = ({ restaurantId }: { restaurantId?: number }) => {
   });
 
   return (
-    <Card className="col-span-full lg:col-span-1">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Recent Reviews</CardTitle>
-        <Button variant="ghost" onClick={() => navigate("/dashboard/reviews")}>
-          View all
-        </Button>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {reviews?.map((review) => (
-          <div
-            key={review.id}
-            className="flex items-start space-x-4 border-b border-gray-100 pb-4 last:border-0"
-          >
-            <div className="flex items-center space-x-1">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-4 w-4 ${
-                    i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                  }`}
-                />
-              ))}
-            </div>
-            <div className="flex-1">
-              <p className="text-sm text-gray-600">{review.comment}</p>
-              <div className="mt-1 flex items-center justify-between text-xs text-gray-500">
-                <span>{review.reviewer_name}</span>
-                <span>{new Date(review.created_at).toLocaleDateString()}</span>
-              </div>
+    <div className="space-y-4">
+      {reviews?.map((review) => (
+        <div
+          key={review.id}
+          className="flex items-start space-x-4 p-4 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex-shrink-0">
+            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+              <span className="text-lg font-semibold text-gray-600">
+                {review.reviewer_name.charAt(0).toUpperCase()}
+              </span>
             </div>
           </div>
-        ))}
-      </CardContent>
-    </Card>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {review.reviewer_name}
+              </p>
+              <div className="flex items-center space-x-1">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`h-4 w-4 ${
+                      i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+            <p className="mt-1 text-sm text-gray-600 line-clamp-2">{review.comment}</p>
+            <p className="mt-1 text-xs text-gray-500">
+              {new Date(review.created_at).toLocaleDateString()}
+            </p>
+          </div>
+        </div>
+      ))}
+      <div className="pt-4 border-t">
+        <Button 
+          variant="outline" 
+          className="w-full"
+          onClick={() => navigate("/dashboard/reviews")}
+        >
+          View all reviews
+        </Button>
+      </div>
+    </div>
   );
 };
