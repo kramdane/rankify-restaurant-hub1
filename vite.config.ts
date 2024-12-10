@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => {
       port: 8080,
       proxy: {
         '/api/chat': {
-          target: 'https://mwxtirzaskicmjdqzytd.supabase.co/functions/v1/chat',
+          target: `${supabaseUrl}/functions/v1/chat`,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/chat/, ''),
           secure: false,

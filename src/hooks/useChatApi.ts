@@ -25,25 +25,24 @@ export const useChatApi = ({ restaurantId, reviews }: UseChatApiProps) => {
         }),
       });
 
-      // Log the raw response for debugging
-      const rawResponse = await response.text();
-      console.log('Raw response:', rawResponse);
-
-      // Check if response is OK
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server response:', errorText);
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      // Try to parse the response as JSON
-      let data;
-      try {
-        data = JSON.parse(rawResponse);
-      } catch (parseError) {
-        console.error('Error parsing response:', parseError);
-        throw new Error('Invalid JSON response from server');
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Invalid content type:', contentType);
+        console.error('Response text:', text);
+        throw new Error('Server did not return JSON');
       }
 
+      const data = await response.json();
+
       if (!data.response) {
+        console.error('Invalid response format:', data);
         throw new Error('Invalid response format');
       }
 
