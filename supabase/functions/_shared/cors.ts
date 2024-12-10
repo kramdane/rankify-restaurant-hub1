@@ -12,17 +12,10 @@ export const corsHeaders = {
 };
 
 export function handleCors(req: Request) {
-  const origin = req.headers.get('Origin') || '';
-  
-  // Handle preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, {
-      headers: {
-        ...corsHeaders,
-        'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0],
-      },
+      headers: corsHeaders,
     });
   }
-
   return null;
 }
