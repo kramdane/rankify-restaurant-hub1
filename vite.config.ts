@@ -33,7 +33,10 @@ export default defineConfig(({ mode }) => {
           headers: {
             'Authorization': `Bearer ${supabaseAnonKey}`,
             'apikey': supabaseAnonKey,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization, apikey'
           }
         }
       }
