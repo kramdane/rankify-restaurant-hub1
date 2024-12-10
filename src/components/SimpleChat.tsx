@@ -45,10 +45,8 @@ export const SimpleChat = () => {
   });
 
   const formatMessage = (content: string) => {
-    // Format lists and advice
     return content.split('\n').map((line, index) => {
       if (line.startsWith('-')) {
-        // Format list items with proper spacing and bullet points
         return (
           <div key={index} className="ml-4 my-1 flex items-start">
             <span className="mr-2">•</span>
@@ -56,7 +54,6 @@ export const SimpleChat = () => {
           </div>
         );
       }
-      // Add spacing between paragraphs
       return <div key={index} className="my-1">{line}</div>;
     });
   };
@@ -68,7 +65,6 @@ export const SimpleChat = () => {
     const userMessage = input.trim();
     setInput("");
     
-    // Add user message to chat
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     
     try {
@@ -82,7 +78,7 @@ export const SimpleChat = () => {
   if (!isOpen) {
     return (
       <Button
-        className="fixed bottom-4 right-4 h-12 w-12 rounded-full p-0 shadow-lg hover:shadow-xl transition-shadow"
+        className="fixed bottom-4 left-4 h-12 w-12 rounded-full p-0 shadow-lg hover:shadow-xl transition-shadow"
         onClick={() => setIsOpen(true)}
       >
         <MessageCircle className="h-6 w-6" />
@@ -91,7 +87,7 @@ export const SimpleChat = () => {
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto p-4 bg-white shadow-lg relative">
+    <Card className="fixed bottom-4 left-4 w-full max-w-2xl p-4 bg-white shadow-lg">
       <Button
         variant="ghost"
         size="icon"
