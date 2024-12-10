@@ -24,11 +24,11 @@ export function SocialMediaSection({ form }: SocialMediaSectionProps) {
               <FormLabel>Preferred Review Platform</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white">
                     <SelectValue placeholder="Select preferred platform" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   <SelectItem value="google">Google Business</SelectItem>
                   <SelectItem value="facebook">Facebook</SelectItem>
                   <SelectItem value="tripadvisor">Tripadvisor</SelectItem>
@@ -46,7 +46,7 @@ export function SocialMediaSection({ form }: SocialMediaSectionProps) {
             <FormItem>
               <FormLabel>Facebook Page Link</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="https://facebook.com/your-page" />
+                <Input {...field} placeholder="https://facebook.com/your-page" className="bg-white" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -60,7 +60,7 @@ export function SocialMediaSection({ form }: SocialMediaSectionProps) {
             <FormItem>
               <FormLabel>Google My Business Link</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="https://business.google.com/your-business" />
+                <Input {...field} placeholder="https://business.google.com/your-business" className="bg-white" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -74,7 +74,7 @@ export function SocialMediaSection({ form }: SocialMediaSectionProps) {
             <FormItem>
               <FormLabel>Tripadvisor Profile Link</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="https://tripadvisor.com/your-restaurant" />
+                <Input {...field} placeholder="https://tripadvisor.com/your-restaurant" className="bg-white" />
               </FormControl>
               <FormMessage />
             </FormItem>

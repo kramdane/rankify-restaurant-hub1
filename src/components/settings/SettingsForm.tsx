@@ -28,6 +28,7 @@ export function SettingsForm({ userId }: SettingsFormProps) {
       facebook_url: "",
       google_business_url: "",
       tripadvisor_url: "",
+      preferred_social_media: "google",
     },
   });
 
@@ -43,7 +44,19 @@ export function SettingsForm({ userId }: SettingsFormProps) {
       if (error) throw error;
       
       if (data) {
-        form.reset(data);
+        // Update form with the fetched data
+        form.reset({
+          name: data.name || "",
+          owner_name: data.owner_name || "",
+          phone: data.phone || "",
+          email: data.email || "",
+          address: data.address || "",
+          business_category: data.business_category || "",
+          facebook_url: data.facebook_url || "",
+          google_business_url: data.google_business_url || "",
+          tripadvisor_url: data.tripadvisor_url || "",
+          preferred_social_media: data.preferred_social_media || "google",
+        });
       }
       
       return data;
@@ -100,7 +113,7 @@ export function SettingsForm({ userId }: SettingsFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <BusinessInformationSection form={form} />
         <SocialMediaSection form={form} />
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
           Save Changes
         </Button>
       </form>
