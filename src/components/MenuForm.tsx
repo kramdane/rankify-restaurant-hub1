@@ -119,7 +119,7 @@ export function MenuForm({ onSubmit, onCancel }: MenuFormProps) {
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter item name" {...field} />
+                        <Input type="text" placeholder="Enter item name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
