@@ -34,6 +34,7 @@ export const useChatApi = () => {
       // Check if response is HTML
       if (contentType?.includes('text/html') || responseText.includes('<!DOCTYPE html>') || responseText.includes('<html')) {
         console.error('Received HTML response:', responseText.substring(0, 200));
+        toast.error('Server returned an unexpected HTML response. Please check the server logs.');
         throw new Error(`Received HTML response instead of JSON. Status: ${response.status}`);
       }
 
@@ -43,6 +44,7 @@ export const useChatApi = () => {
         data = JSON.parse(responseText);
       } catch (parseError) {
         console.error('Failed to parse response as JSON:', parseError);
+        toast.error('Failed to parse the server response. Please try again later.');
         throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}...`);
       }
 

@@ -78,6 +78,7 @@ serve(async (req) => {
       // Extract and validate the response
       const response = completion.choices[0]?.message?.content
       if (!response) {
+        console.error('No response received from OpenAI')
         throw new Error('No response received from OpenAI')
       }
 
