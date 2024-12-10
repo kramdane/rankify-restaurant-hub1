@@ -15,7 +15,7 @@ const PublicMenu = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("restaurants")
-        .select("name, description")
+        .select("*")
         .eq("id", restaurantId)
         .single();
       
