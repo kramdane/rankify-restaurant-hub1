@@ -1,7 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SortableMenuItem } from "./SortableMenuItem";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 
 interface MenuItem {
   id: string;
@@ -9,45 +6,38 @@ interface MenuItem {
   description: string;
   price: number;
   category: string;
-  position?: number;
 }
 
 interface MenuCategoryProps {
   category: string;
   items: MenuItem[];
-  onDragEnd: (event: any) => void;
 }
 
-export const MenuCategory = ({ category, items, onDragEnd }: MenuCategoryProps) => {
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
+export const MenuCategory = ({ category, items }: MenuCategoryProps) => {
   return (
     <Card className="bg-white shadow-sm">
       <CardHeader>
         <CardTitle>{category}</CardTitle>
       </CardHeader>
       <CardContent>
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={onDragEnd}
-        >
-          <SortableContext
-            items={items.map(item => item.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="space-y-6">
-              {items.map((item) => (
-                <SortableMenuItem key={item.id} item={item} />
-              ))}
+        <div className="space-y-6">
+          {items.map((item) => (
+            <div 
+              key={item.id}
+              className="flex justify-between items-start border-b pb-4 last:border-0 hover:bg-gray-50 rounded-lg p-3 transition-colors"
+            >
+              <div className="space-y-1 flex-1">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">{item.name}</h3>
+                  <span className="font-semibold">${item.price.toFixed(2)}</span>
+                </div>
+                <p className="text-muted-foreground text-sm">
+                  {item.description}
+                </p>
+              </div>
             </div>
-          </SortableContext>
-        </DndContext>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
