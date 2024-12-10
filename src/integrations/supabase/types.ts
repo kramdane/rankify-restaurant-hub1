@@ -149,6 +149,50 @@ export type Database = {
         }
         Relationships: []
       }
+      menu_items: {
+        Row: {
+          active: boolean | null
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          price: number
+          restaurant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          price: number
+          restaurant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          price?: number
+          restaurant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
