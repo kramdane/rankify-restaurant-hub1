@@ -26,14 +26,13 @@ export default defineConfig(({ mode }) => {
       port: 8080,
       proxy: {
         '/api/chat': {
-          target: supabaseUrl,
+          target: `${supabaseUrl}/functions/v1/chat`,
           changeOrigin: true,
           secure: false,
-          rewrite: (path) => path.replace(/^\/api\/chat/, '/functions/v1/chat'),
+          rewrite: (path) => path.replace(/^\/api\/chat/, ''),
           headers: {
             'Authorization': `Bearer ${supabaseAnonKey}`,
             'apikey': supabaseAnonKey,
-            'Content-Type': 'application/json',
           }
         }
       }

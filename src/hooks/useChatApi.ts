@@ -17,15 +17,14 @@ export const useChatApi = () => {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to send message');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
       return data.response;
     } catch (error) {
       console.error('Error in sendMessage:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to send message');
+      toast.error('Failed to send message. Please try again.');
       throw error;
     } finally {
       setIsProcessing(false);
