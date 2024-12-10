@@ -49,73 +49,19 @@ serve(async (req) => {
       );
     }
 
-    // Query reviews if needed
-    let reviews = [];
-    const lowerMessage = message.toLowerCase();
-    if (lowerMessage.includes('review') || 
-        lowerMessage.includes('rating') || 
-        lowerMessage.includes('good point') || 
-        lowerMessage.includes('bad point') ||
-        lowerMessage.includes('like') ||
-        lowerMessage.includes('love')) {
-      const { data: reviewsData, error: reviewsError } = await supabase
-        .from('reviews')
-        .select('*')
-        .eq('restaurant_id', restaurantId)
-        .order('created_at', { ascending: false });
-
-      if (!reviewsError) {
-        reviews = reviewsData;
-      }
-    }
-
-    // Build context based on the message content and restaurant data
-    let contextData = '';
-
-    // Handle different types of queries
-    if (lowerMessage.includes('good point') || lowerMessage.includes('bad point') || 
-        (lowerMessage.includes('what') && (lowerMessage.includes('like') || lowerMessage.includes('love')))) {
-      if (reviews.length > 0) {
-        const reviewTexts = reviews.map(review => ({
-          rating: review.rating,
-          comment: review.comment
-        }));
-
-        const positiveReviews = reviewTexts.filter(r => r.rating >= 4);
-        const negativeReviews = reviewTexts.filter(r => r.rating <= 2);
-
-        contextData = 'Based on reviews:\n';
-        
-        if (positiveReviews.length > 0) {
-          contextData += '\nPositive points:\n';
-          positiveReviews.forEach(review => {
-            if (review.comment) contextData += `- ${review.comment}\n`;
-          });
+    // Store the message in the messages table
+    const { error: messageError } = await supabase
+      .from('messages')
+      .insert([
+        {
+          role: 'user',
+          content: message,
+          restaurant_id: restaurantId
         }
+      ]);
 
-        if (negativeReviews.length > 0) {
-          contextData += '\nAreas for improvement:\n';
-          negativeReviews.forEach(review => {
-            if (review.comment) contextData += `- ${review.comment}\n`;
-          });
-        }
-      } else {
-        contextData = "No reviews yet.";
-      }
-    } else if (lowerMessage.includes('review') || lowerMessage.includes('rating')) {
-      if (reviews.length > 0) {
-        const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
-        const recentReviews = reviews.slice(0, 3);
-        contextData = `${reviews.length} reviews, ${averageRating.toFixed(1)}★ average.\n\nLatest reviews:\n`;
-        recentReviews.forEach(review => {
-          contextData += `- ${review.reviewer_name}: ${review.rating}★ - "${review.comment}"\n`;
-        });
-      } else {
-        contextData = "No reviews yet.";
-      }
-    } else {
-      // For other queries, use minimal context
-      contextData = `Restaurant: ${restaurant.name}`;
+    if (messageError) {
+      console.error('Error storing message:', messageError);
     }
 
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -136,11 +82,11 @@ serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: `You are a concise restaurant assistant. Keep initial responses brief and direct. Only provide detailed explanations when specifically asked. Format responses with bullet points when listing multiple items. The restaurant name is "${restaurant.name}".`
+          content: `You are a helpful restaurant assistant for ${restaurant.name}. Keep responses concise and focused on restaurant management topics.`
         },
         {
           role: "user",
-          content: contextData ? `${message}\nContext: ${contextData}` : message
+          content: message
         }
       ],
       temperature: 0.7,
@@ -153,10 +99,20 @@ serve(async (req) => {
       throw new Error('No response from OpenAI');
     }
 
-    // Log the interaction for debugging
-    console.log('Message:', message);
-    console.log('Context:', contextData);
-    console.log('Response:', response);
+    // Store the assistant's response
+    const { error: assistantMessageError } = await supabase
+      .from('messages')
+      .insert([
+        {
+          role: 'assistant',
+          content: response,
+          restaurant_id: restaurantId
+        }
+      ]);
+
+    if (assistantMessageError) {
+      console.error('Error storing assistant message:', assistantMessageError);
+    }
 
     return new Response(
       JSON.stringify({ response }),
