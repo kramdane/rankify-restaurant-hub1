@@ -30,14 +30,14 @@ export const useChatApi = () => {
     enabled: !!user?.id,
   });
 
-  const sendMessage = async (message: string) => {
+  const sendMessage = async (message: string, restaurantId?: string) => {
     setIsProcessing(true);
     
     try {
       const { data, error } = await supabase.functions.invoke('chat', {
         body: { 
           message,
-          restaurantId: restaurant?.id 
+          restaurantId: restaurantId || restaurant?.id 
         }
       });
 
