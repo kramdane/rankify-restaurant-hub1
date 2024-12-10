@@ -54,7 +54,7 @@ export const ContactList = ({
               <TableCell>{new Date(contact.addeddate).toLocaleDateString()}</TableCell>
               <TableCell>{contact.reviewcount || 0}</TableCell>
               <TableCell className="flex items-center gap-1">
-                {calculateAverageRating(selectedContactReviews || [])}
+                {contact.customer_reviews?.[0]?.average_rating?.toFixed(1) || "0.0"}
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
               </TableCell>
             </TableRow>
