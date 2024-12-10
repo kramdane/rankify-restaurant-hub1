@@ -13,8 +13,10 @@ serve(async (req) => {
     const { message } = await req.json()
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4",  // Changed from gpt-4o to gpt-4
       messages: [{ role: "user", content: message }],
+      temperature: 0.7,
+      max_tokens: 500,
     })
 
     const response = completion.choices[0]?.message?.content || 'Sorry, I could not process that.'
@@ -29,6 +31,7 @@ serve(async (req) => {
       },
     )
   } catch (error) {
+    console.error('Error in chat function:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       {
