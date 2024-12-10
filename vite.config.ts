@@ -29,12 +29,13 @@ export default defineConfig(({ mode }) => {
       port: 8080,
       proxy: {
         '/api/chat': {
-          target: supabaseUrl,
+          target: `${supabaseUrl}/rest/v1/rpc/handle_chat`,
           changeOrigin: true,
-          rewrite: (path: string) => path.replace(/^\/api\/chat/, '/functions/v1/chat'),
           headers: {
             'apikey': supabaseAnonKey,
-            'Authorization': `Bearer ${supabaseAnonKey}`
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
           } as Record<string, string>
         }
       }
