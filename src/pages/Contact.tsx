@@ -15,17 +15,38 @@ const ContactPage = () => {
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["contacts"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: contactsData, error: contactsError } = await supabase
         .from("contacts")
-        .select("*, customer_reviews(*)")
+        .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) {
+      if (contactsError) {
         toast.error("Failed to load contacts");
-        throw error;
+        throw contactsError;
       }
 
-      return data as Contact[];
+      // Fetch customer reviews separately and merge with contacts
+      const { data: customerReviews, error: reviewsError } = await supabase
+        .from("customer_reviews")
+        .select("*");
+
+      if (reviewsError) {
+        toast.error("Failed to load reviews");
+        throw reviewsError;
+      }
+
+      // Map customer reviews to contacts
+      const contactsWithReviews = contactsData.map((contact) => {
+        const reviews = customerReviews.filter(
+          (review) => review.email === contact.email
+        );
+        return {
+          ...contact,
+          customer_reviews: reviews.length > 0 ? reviews : null,
+        };
+      });
+
+      return contactsWithReviews as Contact[];
     },
   });
 
