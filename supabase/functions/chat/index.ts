@@ -8,33 +8,6 @@ serve(async (req) => {
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
 
-  // Log all headers for debugging
-  console.log('Received headers:', Object.fromEntries(req.headers.entries()));
-
-  // Verify authorization
-  const authHeader = req.headers.get('Authorization');
-  const apiKey = req.headers.get('apikey');
-  
-  console.log('Auth header:', authHeader);
-  console.log('API key:', apiKey);
-
-  if (!authHeader || !apiKey) {
-    return new Response(
-      JSON.stringify({ 
-        error: 'Missing authorization header or API key',
-        receivedHeaders: Object.fromEntries(req.headers.entries())
-      }),
-      { 
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': req.headers.get('Origin') || ALLOWED_ORIGINS[0],
-        },
-        status: 401 
-      }
-    );
-  }
-
   try {
     const { message, restaurantId, reviews } = await req.json()
 
@@ -48,10 +21,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       { 
         global: { 
-          headers: { 
-            Authorization: authHeader,
-            apikey: apiKey
-          } 
+          headers: { Authorization: req.headers.get('Authorization') ?? '' } 
         } 
       }
     )
@@ -90,8 +60,6 @@ serve(async (req) => {
     
     Please provide helpful and friendly responses based on this context.`
 
-    console.log('Sending request to OpenAI with context:', context)
-
     // Get AI response
     const completion = await openai.createChatCompletion({
       model: "gpt-4",
@@ -102,8 +70,6 @@ serve(async (req) => {
       temperature: 0.7,
       max_tokens: 500,
     })
-
-    console.log('Received response from OpenAI:', completion.data)
 
     if (!completion.data.choices[0].message?.content) {
       throw new Error('No response received from OpenAI')
@@ -118,7 +84,6 @@ serve(async (req) => {
         headers: { 
           ...corsHeaders,
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': req.headers.get('Origin') || ALLOWED_ORIGINS[0],
         },
         status: 200 
       },
@@ -126,7 +91,6 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in Edge Function:', error)
     
-    // Return error response with CORS headers
     return new Response(
       JSON.stringify({ 
         error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -136,7 +100,6 @@ serve(async (req) => {
         headers: { 
           ...corsHeaders,
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': req.headers.get('Origin') || ALLOWED_ORIGINS[0],
         },
         status: 500 
       },

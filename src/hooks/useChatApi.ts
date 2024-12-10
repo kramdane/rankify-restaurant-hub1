@@ -26,7 +26,6 @@ export const useChatApi = ({ restaurantId, reviews }: UseChatApiProps) => {
             'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
           })
         },
-        credentials: import.meta.env.PROD ? 'include' : 'omit',
         body: JSON.stringify({
           message,
           restaurantId,
