@@ -22,31 +22,31 @@ export default {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        background: "#F6FAFF",
-        foreground: "#333333",
+        background: "#F8F9FE",
+        foreground: "#1A1F2C",
         primary: {
-          DEFAULT: "#007BFF",
+          DEFAULT: "#9b87f5",
           foreground: "#ffffff",
         },
         secondary: {
-          DEFAULT: "#FFB347",
+          DEFAULT: "#7E69AB",
           foreground: "#ffffff",
         },
         accent: {
-          DEFAULT: "#E3EFFE",
-          foreground: "#333333",
+          DEFAULT: "#F4F7FE",
+          foreground: "#1A1F2C",
         },
         muted: {
-          DEFAULT: "#7D7D7D",
-          foreground: "#F6FAFF",
+          DEFAULT: "#6E59A5",
+          foreground: "#F8F9FE",
         },
         destructive: {
           DEFAULT: "#F8D7DA",
-          foreground: "#333333",
+          foreground: "#1A1F2C",
         },
         success: {
           DEFAULT: "#DFF6DF",
-          foreground: "#333333",
+          foreground: "#1A1F2C",
         },
       },
       borderRadius: {
