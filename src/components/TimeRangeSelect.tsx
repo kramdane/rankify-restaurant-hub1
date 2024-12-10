@@ -49,10 +49,10 @@ export const TimeRangeSelect = ({ onChange }: TimeRangeSelectProps) => {
   return (
     <div className="flex items-center gap-4">
       <Select onValueChange={handleRangeChange} defaultValue="last7days">
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[180px] bg-white">
           <SelectValue placeholder="Select time range" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="bg-white">
           <SelectItem value="today">Today</SelectItem>
           <SelectItem value="yesterday">Yesterday</SelectItem>
           <SelectItem value="last7days">Last 7 days</SelectItem>
