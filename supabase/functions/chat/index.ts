@@ -9,7 +9,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -50,9 +49,23 @@ serve(async (req) => {
       );
     }
 
+    // Query reviews if needed
+    let reviews = [];
+    const lowerMessage = message.toLowerCase();
+    if (lowerMessage.includes('review') || lowerMessage.includes('rating')) {
+      const { data: reviewsData, error: reviewsError } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('restaurant_id', restaurantId)
+        .order('created_at', { ascending: false });
+
+      if (!reviewsError) {
+        reviews = reviewsData;
+      }
+    }
+
     // Build context based on the message content and restaurant data
     let contextData = '';
-    const lowerMessage = message.toLowerCase();
 
     // Handle different types of queries
     if (lowerMessage.includes('google') && lowerMessage.includes('business')) {
@@ -87,6 +100,17 @@ serve(async (req) => {
       contextData = restaurant.business_category
         ? `Your restaurant category is: ${restaurant.business_category}`
         : "You haven't set up your business category yet. You can add it in the settings.";
+    } else if (lowerMessage.includes('review') || lowerMessage.includes('rating')) {
+      if (reviews.length > 0) {
+        const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
+        const recentReviews = reviews.slice(0, 3); // Get last 3 reviews
+        contextData = `You have ${reviews.length} reviews with an average rating of ${averageRating.toFixed(1)}. Here are your most recent reviews:\n`;
+        recentReviews.forEach(review => {
+          contextData += `- ${review.reviewer_name}: ${review.rating}★ - "${review.comment}"\n`;
+        });
+      } else {
+        contextData = "You don't have any reviews yet.";
+      }
     }
 
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
