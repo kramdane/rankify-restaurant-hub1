@@ -12,12 +12,24 @@ export const useChatApi = ({ restaurantId, reviews }: UseChatApiProps) => {
   const sendMessage = async (message: string) => {
     setIsProcessing(true);
     try {
-      const { data, error } = await supabase
-        .rpc('handle_chat', { message });
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          message,
+          restaurantId,
+          reviews 
+        }),
+      });
 
-      if (error) throw error;
-      
-      return data || 'Sorry, I could not process your request.';
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      const data = await response.json();
+      return data.response;
     } catch (error) {
       console.error('Error in sendMessage:', error);
       throw error;
