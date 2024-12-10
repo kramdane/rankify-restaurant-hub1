@@ -21,8 +21,11 @@ serve(async (req) => {
     
     // Create chat completion
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [{ role: "user", content: message }],
+      model: "gpt-3.5-turbo",
+      messages: [
+        {"role": "system", "content": "You are a helpful restaurant assistant. You help with reviews, menu management, and customer service."},
+        {"role": "user", "content": message}
+      ],
       temperature: 0.7,
       max_tokens: 500,
     })
