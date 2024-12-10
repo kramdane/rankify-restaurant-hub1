@@ -17,7 +17,7 @@ interface ChatContainerProps {
 export const ChatContainer = ({ restaurantId, reviews, ownerName }: ChatContainerProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const { sendMessage, isProcessing } = useChatApi({ restaurantId, reviews });
+  const { sendMessage, isProcessing } = useChatApi();
 
   useEffect(() => {
     if (ownerName) {
