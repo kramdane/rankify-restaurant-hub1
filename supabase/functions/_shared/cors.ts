@@ -9,6 +9,7 @@ export const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Max-Age': '86400',
+  'Access-Control-Allow-Credentials': 'true'
 };
 
 export function handleCors(req: Request) {
@@ -25,5 +26,6 @@ export function handleCors(req: Request) {
     });
   }
 
+  // For non-OPTIONS requests, return null but the calling function should use corsHeaders
   return null;
 }
