@@ -1,6 +1,3 @@
--- Enable the pgvector extension if you haven't already
-create extension if not exists pgvector;
-
 -- Create the chat handling function
 create or replace function handle_chat(message text)
 returns text
