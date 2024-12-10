@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { Configuration, OpenAIApi } from "https://esm.sh/openai@3.1.0"
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { Configuration, OpenAIApi } from 'https://esm.sh/openai@3.1.0'
 import { corsHeaders } from '../_shared/cors.ts'
 
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
@@ -20,18 +20,27 @@ serve(async (req) => {
     const { message, restaurantId, reviews } = await req.json()
 
     if (!message) {
-      throw new Error('Message is required')
+      return new Response(
+        JSON.stringify({ error: 'Message is required' }),
+        { 
+          status: 400,
+          headers: { 
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
     }
-
-    // Create a system message that includes context about the restaurant and reviews
-    const systemMessage = `You are a helpful AI assistant for a restaurant${
-      reviews ? ` with ${reviews.length} reviews` : ''
-    }. You help answer questions about reviews, menu items, and general restaurant management.`
 
     const completion = await openai.createChatCompletion({
       model: "gpt-4",
       messages: [
-        { role: "system", content: systemMessage },
+        { 
+          role: "system", 
+          content: `You are a helpful AI assistant for a restaurant${
+            reviews ? ` with ${reviews.length} reviews` : ''
+          }. You help answer questions about reviews, menu items, and general restaurant management.`
+        },
         { role: "user", content: message }
       ],
       temperature: 0.7,
@@ -47,7 +56,7 @@ serve(async (req) => {
       JSON.stringify({ response: aiResponse }),
       { 
         headers: { 
-          ...corsHeaders, 
+          ...corsHeaders,
           'Content-Type': 'application/json'
         } 
       }
@@ -61,7 +70,7 @@ serve(async (req) => {
       }),
       { 
         headers: { 
-          ...corsHeaders, 
+          ...corsHeaders,
           'Content-Type': 'application/json'
         },
         status: 500 
