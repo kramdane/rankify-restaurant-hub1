@@ -52,7 +52,12 @@ serve(async (req) => {
     // Query reviews if needed
     let reviews = [];
     const lowerMessage = message.toLowerCase();
-    if (lowerMessage.includes('review') || lowerMessage.includes('rating')) {
+    if (lowerMessage.includes('review') || 
+        lowerMessage.includes('rating') || 
+        lowerMessage.includes('good point') || 
+        lowerMessage.includes('bad point') ||
+        lowerMessage.includes('like') ||
+        lowerMessage.includes('love')) {
       const { data: reviewsData, error: reviewsError } = await supabase
         .from('reviews')
         .select('*')
@@ -68,7 +73,44 @@ serve(async (req) => {
     let contextData = '';
 
     // Handle different types of queries
-    if (lowerMessage.includes('google') && lowerMessage.includes('business')) {
+    if (lowerMessage.includes('good point') || lowerMessage.includes('bad point') || 
+        (lowerMessage.includes('what') && (lowerMessage.includes('like') || lowerMessage.includes('love')))) {
+      if (reviews.length > 0) {
+        const reviewTexts = reviews.map(review => ({
+          rating: review.rating,
+          comment: review.comment
+        }));
+
+        const positiveReviews = reviewTexts.filter(r => r.rating >= 4);
+        const negativeReviews = reviewTexts.filter(r => r.rating <= 2);
+        const mixedReviews = reviewTexts.filter(r => r.rating === 3);
+
+        contextData = 'Based on your reviews:\n\n';
+        
+        if (positiveReviews.length > 0) {
+          contextData += 'Positive aspects mentioned in good reviews:\n';
+          positiveReviews.forEach(review => {
+            if (review.comment) contextData += `- "${review.comment}"\n`;
+          });
+        }
+
+        if (negativeReviews.length > 0) {
+          contextData += '\nAreas for improvement from critical reviews:\n';
+          negativeReviews.forEach(review => {
+            if (review.comment) contextData += `- "${review.comment}"\n`;
+          });
+        }
+
+        if (mixedReviews.length > 0) {
+          contextData += '\nMixed feedback (3-star reviews):\n';
+          mixedReviews.forEach(review => {
+            if (review.comment) contextData += `- "${review.comment}"\n`;
+          });
+        }
+      } else {
+        contextData = "You don't have any reviews yet to analyze.";
+      }
+    } else if (lowerMessage.includes('google') && lowerMessage.includes('business')) {
       contextData = restaurant.google_business_url 
         ? `Your Google Business URL is: ${restaurant.google_business_url}`
         : "You haven't set up your Google Business URL yet. You can add it in the settings.";
@@ -103,7 +145,7 @@ serve(async (req) => {
     } else if (lowerMessage.includes('review') || lowerMessage.includes('rating')) {
       if (reviews.length > 0) {
         const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
-        const recentReviews = reviews.slice(0, 3); // Get last 3 reviews
+        const recentReviews = reviews.slice(0, 3);
         contextData = `You have ${reviews.length} reviews with an average rating of ${averageRating.toFixed(1)}. Here are your most recent reviews:\n`;
         recentReviews.forEach(review => {
           contextData += `- ${review.reviewer_name}: ${review.rating}★ - "${review.comment}"\n`;
@@ -131,7 +173,7 @@ serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: `You are a helpful restaurant management assistant. You have access to the restaurant's data and can provide accurate information about the business. The restaurant name is "${restaurant.name}". Be concise and friendly in your responses.`
+          content: `You are a helpful restaurant management assistant. You have access to the restaurant's data and can provide accurate information about the business. The restaurant name is "${restaurant.name}". Be concise and friendly in your responses. When analyzing reviews, focus on providing actionable insights and clear patterns in customer feedback.`
         },
         {
           role: "user",
