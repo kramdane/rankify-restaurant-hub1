@@ -13,7 +13,12 @@ const openai = new OpenAIApi(configuration)
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { 
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      }
+    })
   }
 
   try {
