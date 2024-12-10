@@ -17,9 +17,22 @@ export const useChatApi = () => {
         body: JSON.stringify({ message }),
       });
 
-      // Log the raw response for debugging
+      // Log response status and headers for debugging
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+      // Get the content type
+      const contentType = response.headers.get('Content-Type');
+      console.log('Content-Type:', contentType);
+
+      // Read response as text first
       const responseText = await response.text();
       console.log('Raw response:', responseText);
+
+      // Check if response is HTML
+      if (contentType?.includes('text/html')) {
+        throw new Error(`Received HTML response instead of JSON. Status: ${response.status}`);
+      }
 
       // Try to parse the response as JSON
       let data;
@@ -33,7 +46,7 @@ export const useChatApi = () => {
       console.log('Parsed response data:', data);
 
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
       }
 
       if (!data.isConfigured) {
