@@ -9,6 +9,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -19,13 +20,7 @@ serve(async (req) => {
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
       console.error('OpenAI API key not found');
-      return new Response(
-        JSON.stringify({ error: 'OpenAI API key not configured' }),
-        { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      throw new Error('OpenAI API key not configured');
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -33,25 +28,13 @@ serve(async (req) => {
     
     if (!supabaseUrl || !supabaseServiceRoleKey) {
       console.error('Supabase credentials not found');
-      return new Response(
-        JSON.stringify({ error: 'Supabase credentials not configured' }),
-        { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      throw new Error('Supabase credentials not configured');
     }
 
     const { restaurantId } = await req.json();
     if (!restaurantId) {
       console.error('No restaurant ID provided');
-      return new Response(
-        JSON.stringify({ error: 'Restaurant ID is required' }),
-        { 
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      throw new Error('Restaurant ID is required');
     }
 
     console.log('Fetching reviews for restaurant:', restaurantId);
@@ -59,28 +42,24 @@ serve(async (req) => {
     
     const { data: reviews, error: reviewsError } = await supabase
       .from('reviews')
-      .select('comment')
+      .select('*')
       .eq('restaurant_id', restaurantId)
       .not('comment', 'is', null);
 
     if (reviewsError) {
       console.error('Error fetching reviews:', reviewsError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to fetch reviews' }),
-        { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      throw new Error('Failed to fetch reviews');
     }
 
     console.log(`Found ${reviews.length} reviews`);
     
     if (reviews.length === 0) {
-      console.log('No reviews found, returning empty array');
       return new Response(
         JSON.stringify({ words: [] }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }}
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200
+        }
       );
     }
 
@@ -91,11 +70,11 @@ serve(async (req) => {
     
     try {
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
-            content: "Extract key words and phrases from the reviews and classify their sentiment. Return a JSON array where each item has: word (string), sentiment (positive, negative, or neutral), and count (number of occurrences). Focus on meaningful words and ignore common stop words. Format the response as a valid JSON array."
+            content: "Extract key words and phrases from the reviews and classify their sentiment. Return a JSON array where each item has: word (string), sentiment (positive, negative, or neutral), count (number of occurrences), and reviews (array of full review objects that contain this word). Focus on meaningful words and ignore common stop words. Format the response as a valid JSON array."
           },
           {
             role: "user",
@@ -103,11 +82,11 @@ serve(async (req) => {
           }
         ],
         temperature: 0.7,
-        max_tokens: 500
+        max_tokens: 1000
       });
 
       const response = completion.choices[0]?.message?.content;
-      console.log('OpenAI API response:', response);
+      console.log('OpenAI API response received');
 
       if (!response) {
         throw new Error('No response from OpenAI');
@@ -116,30 +95,38 @@ serve(async (req) => {
       let analysis;
       try {
         analysis = JSON.parse(response);
-        console.log('Parsed analysis:', analysis);
+        console.log('Successfully parsed OpenAI response');
       } catch (error) {
         console.error('Error parsing OpenAI response:', error);
         throw new Error('Failed to parse OpenAI response');
       }
 
+      // Add the full review objects to each word's reviews array
+      analysis = analysis.map((word: any) => ({
+        ...word,
+        reviews: reviews.filter(review => 
+          review.comment.toLowerCase().includes(word.word.toLowerCase())
+        )
+      }));
+
       return new Response(
         JSON.stringify({ words: analysis }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }}
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200
+        }
       );
     } catch (openAIError) {
       console.error('OpenAI API error:', openAIError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to analyze reviews with OpenAI' }),
-        { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      throw new Error('Failed to analyze reviews with OpenAI');
     }
   } catch (error) {
     console.error('Error in analyze-reviews function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.toString()
+      }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
