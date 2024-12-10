@@ -3,17 +3,17 @@ CREATE TYPE message_role AS ENUM ('user', 'assistant');
 
 -- Create a messages table to store chat history
 CREATE TABLE IF NOT EXISTS messages (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     role message_role NOT NULL,
     content TEXT NOT NULL,
-    restaurant_id BIGINT REFERENCES restaurants(id),
+    restaurant_id UUID REFERENCES restaurants(id),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Create the chat handling function with proper business logic
 CREATE OR REPLACE FUNCTION handle_chat(
     message TEXT,
-    restaurant_id BIGINT DEFAULT NULL
+    restaurant_id UUID DEFAULT NULL
 )
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -22,7 +22,7 @@ SET search_path = public
 AS $$
 DECLARE
     response TEXT;
-    stored_message_id BIGINT;
+    stored_message_id UUID;
 BEGIN
     -- Store the user message
     INSERT INTO messages (role, content, restaurant_id)
@@ -50,6 +50,5 @@ END;
 $$;
 
 -- Grant necessary permissions
-GRANT USAGE ON SEQUENCE messages_id_seq TO anon, authenticated;
 GRANT ALL ON TABLE messages TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION handle_chat(TEXT, BIGINT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION handle_chat(TEXT, UUID) TO anon, authenticated;
