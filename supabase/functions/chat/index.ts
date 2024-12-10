@@ -61,6 +61,8 @@ serve(async (req) => {
     
     Please provide helpful and friendly responses based on this context.`
 
+    console.log('Sending request to OpenAI with context:', context)
+
     // Get AI response
     const completion = await openai.createChatCompletion({
       model: "gpt-4",
@@ -71,6 +73,8 @@ serve(async (req) => {
       temperature: 0.7,
       max_tokens: 500,
     })
+
+    console.log('Received response from OpenAI:', completion.data)
 
     if (!completion.data.choices[0].message?.content) {
       throw new Error('No response received from OpenAI')
@@ -87,6 +91,8 @@ serve(async (req) => {
       },
     )
   } catch (error) {
+    console.error('Error in Edge Function:', error)
+    
     // Return error response with CORS headers
     return new Response(
       JSON.stringify({ 
