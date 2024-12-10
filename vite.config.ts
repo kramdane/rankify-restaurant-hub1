@@ -3,38 +3,45 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
+// Type declarations for Vite's import.meta.env
 interface ImportMetaEnv {
-  VITE_SUPABASE_URL: string;
-  VITE_SUPABASE_ANON_KEY: string;
+  readonly VITE_SUPABASE_URL: string;
+  readonly VITE_SUPABASE_ANON_KEY: string;
 }
 
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-    proxy: {
-      '/api/chat': {
-        target: import.meta.env.VITE_SUPABASE_URL,
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/chat/, '/functions/v1/chat'),
-        headers: {
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+export default defineConfig(({ mode }) => {
+  // Load environment variables safely
+  const supabaseUrl = process.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+  return {
+    server: {
+      host: "::",
+      port: 8080,
+      proxy: {
+        '/api/chat': {
+          target: supabaseUrl,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/chat/, '/functions/v1/chat'),
+          headers: {
+            'apikey': supabaseAnonKey,
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+          },
         },
       },
     },
-  },
-  plugins: [
-    react(),
-    mode === 'development' && componentTagger(),
-  ].filter(Boolean),
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+    plugins: [
+      react(),
+      mode === 'development' && componentTagger(),
+    ].filter(Boolean),
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
     },
-  },
-}));
+  };
+});
