@@ -32,36 +32,61 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Query data based on the message content
+    // Query restaurant data
+    const { data: restaurant, error: restaurantError } = await supabase
+      .from('restaurants')
+      .select('*')
+      .eq('id', restaurantId)
+      .single();
+
+    if (restaurantError) {
+      console.error('Error fetching restaurant:', restaurantError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to fetch restaurant data' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500,
+        }
+      );
+    }
+
+    // Build context based on the message content and restaurant data
     let contextData = '';
     const lowerMessage = message.toLowerCase();
 
-    if (lowerMessage.includes('last review') || lowerMessage.includes('latest review')) {
-      const { data: reviews } = await supabase
-        .from('reviews')
-        .select('*')
-        .eq('restaurant_id', restaurantId)
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      if (reviews && reviews.length > 0) {
-        const review = reviews[0];
-        contextData = `The latest review was from ${review.reviewer_name} with a rating of ${review.rating} stars on ${new Date(review.created_at).toLocaleDateString()}. They said: "${review.comment}"`;
-      } else {
-        contextData = "There are no reviews yet for this restaurant.";
-      }
-    } else if (lowerMessage.includes('average') && lowerMessage.includes('rate')) {
-      const { data: reviews } = await supabase
-        .from('reviews')
-        .select('rating')
-        .eq('restaurant_id', restaurantId);
-
-      if (reviews && reviews.length > 0) {
-        const average = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
-        contextData = `The average rating for your restaurant is ${average.toFixed(1)} stars based on ${reviews.length} reviews.`;
-      } else {
-        contextData = "There are no reviews yet to calculate an average rating.";
-      }
+    // Handle different types of queries
+    if (lowerMessage.includes('google') && lowerMessage.includes('business')) {
+      contextData = restaurant.google_business_url 
+        ? `Your Google Business URL is: ${restaurant.google_business_url}`
+        : "You haven't set up your Google Business URL yet. You can add it in the settings.";
+    } else if (lowerMessage.includes('facebook')) {
+      contextData = restaurant.facebook_url
+        ? `Your Facebook URL is: ${restaurant.facebook_url}`
+        : "You haven't set up your Facebook URL yet. You can add it in the settings.";
+    } else if (lowerMessage.includes('tripadvisor')) {
+      contextData = restaurant.tripadvisor_url
+        ? `Your TripAdvisor URL is: ${restaurant.tripadvisor_url}`
+        : "You haven't set up your TripAdvisor URL yet. You can add it in the settings.";
+    } else if (lowerMessage.includes('business') && lowerMessage.includes('hour')) {
+      contextData = restaurant.business_hours
+        ? `Your business hours are: ${JSON.stringify(restaurant.business_hours, null, 2)}`
+        : "You haven't set up your business hours yet. You can add them in the settings.";
+    } else if (lowerMessage.includes('address')) {
+      contextData = restaurant.address
+        ? `Your business address is: ${restaurant.address}`
+        : "You haven't set up your business address yet. You can add it in the settings.";
+    } else if (lowerMessage.includes('phone')) {
+      contextData = restaurant.phone
+        ? `Your phone number is: ${restaurant.phone}`
+        : "You haven't set up your phone number yet. You can add it in the settings.";
+    } else if (lowerMessage.includes('email')) {
+      contextData = restaurant.email
+        ? `Your email address is: ${restaurant.email}`
+        : "You haven't set up your email address yet. You can add it in the settings.";
+    } else if (lowerMessage.includes('category') || lowerMessage.includes('type of restaurant')) {
+      contextData = restaurant.business_category
+        ? `Your restaurant category is: ${restaurant.business_category}`
+        : "You haven't set up your business category yet. You can add it in the settings.";
     }
 
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -82,7 +107,7 @@ serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: "You are a helpful restaurant management assistant. Help users understand their restaurant data and reviews. Be concise and friendly in your responses."
+          content: `You are a helpful restaurant management assistant. You have access to the restaurant's data and can provide accurate information about the business. The restaurant name is "${restaurant.name}". Be concise and friendly in your responses.`
         },
         {
           role: "user",

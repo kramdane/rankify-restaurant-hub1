@@ -195,6 +195,7 @@ export type Database = {
           name: string
           owner_name: string | null
           phone: string | null
+          preferred_social_media: string | null
           tripadvisor_url: string | null
           user_id: string
         }
@@ -211,6 +212,7 @@ export type Database = {
           name?: string
           owner_name?: string | null
           phone?: string | null
+          preferred_social_media?: string | null
           tripadvisor_url?: string | null
           user_id: string
         }
@@ -227,6 +229,7 @@ export type Database = {
           name?: string
           owner_name?: string | null
           phone?: string | null
+          preferred_social_media?: string | null
           tripadvisor_url?: string | null
           user_id?: string
         }
