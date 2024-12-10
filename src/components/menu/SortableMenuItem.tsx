@@ -22,22 +22,30 @@ export const SortableMenuItem = ({ item }: SortableMenuItemProps) => {
     setNodeRef,
     transform,
     transition,
+    isDragging,
   } = useSortable({ id: item.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.5 : 1,
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes}>
-      <div className="flex justify-between items-start border-b pb-4 last:border-0">
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      {...attributes}
+      className="cursor-grab active:cursor-grabbing"
+    >
+      <div 
+        {...listeners}
+        className="flex justify-between items-start border-b pb-4 last:border-0 hover:bg-gray-50 rounded-lg p-3 transition-colors"
+      >
         <div className="space-y-1 flex-1">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <button {...listeners} className="cursor-grab hover:cursor-grabbing p-1">
-                <GripVertical className="h-4 w-4 text-gray-400" />
-              </button>
+              <GripVertical className="h-4 w-4 text-gray-400" />
               <h3 className="text-lg font-semibold">{item.name}</h3>
             </div>
             <span className="font-semibold">${item.price.toFixed(2)}</span>
