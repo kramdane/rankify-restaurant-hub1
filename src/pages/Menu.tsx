@@ -7,7 +7,6 @@ import { MenuForm } from "@/components/MenuForm";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { arrayMove } from "@dnd-kit/sortable";
 import { MenuCategory } from "@/components/menu/MenuCategory";
 
 interface MenuItem {
@@ -59,28 +58,6 @@ const Menu = () => {
     enabled: !!restaurant?.id,
   });
 
-  const updateItemPositions = useMutation({
-    mutationFn: async (items: MenuItem[]) => {
-      const updates = items.map((item, index) => ({
-        id: item.id,
-        position: index,
-      }));
-
-      const { error } = await supabase
-        .from("menu_items")
-        .upsert(updates, { onConflict: "id" });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["menuItems"] });
-      toast({
-        title: "Menu order updated",
-        description: "The menu items have been reordered successfully",
-      });
-    },
-  });
-
   const addMenuItem = useMutation({
     mutationFn: async (item: Omit<MenuItem, "id">) => {
       if (!restaurant?.id) throw new Error("No restaurant found");
@@ -103,18 +80,6 @@ const Menu = () => {
       });
     },
   });
-
-  const handleDragEnd = (event: any) => {
-    const { active, over } = event;
-    
-    if (active.id !== over.id) {
-      const oldIndex = menuItems.findIndex((item) => item.id === active.id);
-      const newIndex = menuItems.findIndex((item) => item.id === over.id);
-      
-      const newItems = arrayMove(menuItems, oldIndex, newIndex);
-      updateItemPositions.mutate(newItems);
-    }
-  };
 
   const handleAddItem = (item: Omit<MenuItem, "id">) => {
     addMenuItem.mutate(item);
@@ -177,7 +142,6 @@ const Menu = () => {
               key={category}
               category={category}
               items={items}
-              onDragEnd={handleDragEnd}
             />
           ))}
         </div>
