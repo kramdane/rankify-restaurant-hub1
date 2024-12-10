@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useChatApi } from "@/hooks/useChatApi";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -16,6 +16,7 @@ interface Message {
 export const SimpleChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [isOpen, setIsOpen] = useState(true);
   const { sendMessage, isProcessing } = useChatApi();
 
   // Get the current user's restaurant
@@ -61,9 +62,19 @@ export const SimpleChat = () => {
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <Card className="w-full max-w-2xl mx-auto p-4">
-      <ScrollArea className="h-[400px] pr-4">
+    <Card className="w-full max-w-2xl mx-auto p-4 bg-white shadow-lg relative">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute right-2 top-2"
+        onClick={() => setIsOpen(false)}
+      >
+        <X className="h-4 w-4" />
+      </Button>
+      <ScrollArea className="h-[400px] pr-4 mt-6">
         <div className="space-y-4">
           {messages.map((message, index) => (
             <div
