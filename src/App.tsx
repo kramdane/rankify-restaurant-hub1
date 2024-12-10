@@ -14,10 +14,10 @@ import ReviewForm from "./pages/ReviewForm";
 import Campaigns from "./pages/Campaigns";
 import NewCampaign from "./pages/NewCampaign";
 import Settings from "./pages/Settings";
+import PublicMenu from "./pages/PublicMenu";
 import { useState } from "react";
 
 const App = () => {
-  // Move queryClient inside the component and use useState to maintain its instance
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
@@ -46,6 +46,7 @@ const App = () => {
               <Route path="/dashboard/campaigns" element={<Campaigns />} />
               <Route path="/dashboard/campaigns/new" element={<NewCampaign />} />
               <Route path="/dashboard/settings" element={<Settings />} />
+              <Route path="/menu/:restaurantId" element={<PublicMenu />} />
             </Routes>
           </AuthProvider>
         </BrowserRouter>
