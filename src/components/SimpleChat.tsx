@@ -3,6 +3,8 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
+import { Loader2 } from "lucide-react";
+import { useChatApi } from "@/hooks/useChatApi";
 
 interface Message {
   role: "user" | "assistant";
@@ -12,7 +14,7 @@ interface Message {
 export const SimpleChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { sendMessage, isProcessing } = useChatApi();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,8 +26,16 @@ export const SimpleChat = () => {
     // Add user message to chat
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     
-    // Simple echo response
-    setMessages((prev) => [...prev, { role: "assistant", content: userMessage }]);
+    try {
+      const response = await sendMessage(userMessage);
+      setMessages((prev) => [...prev, { role: "assistant", content: response }]);
+    } catch (error) {
+      console.error('Error in handleSubmit:', error);
+      setMessages((prev) => [...prev, { 
+        role: "assistant", 
+        content: "Sorry, I encountered an error processing your message." 
+      }]);
+    }
   };
 
   return (
@@ -56,8 +66,12 @@ export const SimpleChat = () => {
           placeholder="Type a message..."
           className="flex-1"
         />
-        <Button type="submit" size="icon">
-          ✈️
+        <Button type="submit" size="icon" disabled={isProcessing}>
+          {isProcessing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            "✈️"
+          )}
         </Button>
       </form>
     </Card>
