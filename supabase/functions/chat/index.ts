@@ -4,21 +4,25 @@ import { Configuration, OpenAIApi } from "https://esm.sh/openai@3.1.0"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Max-Age': '86400',
 }
 
 serve(async (req) => {
+  console.log('Request received:', req.method);
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { 
+    console.log('Handling OPTIONS request');
+    return new Response(null, { 
       headers: corsHeaders,
-      status: 200 // Explicitly set 200 status for OPTIONS
-    })
+      status: 204
+    });
   }
 
   try {
+    console.log('Processing POST request');
     const { message, restaurantId, reviews } = await req.json()
 
     // Validate required fields
@@ -26,6 +30,7 @@ serve(async (req) => {
       throw new Error('Message is required')
     }
 
+    console.log('Creating Supabase client');
     // Create a Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -38,11 +43,13 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured')
     }
 
+    console.log('Initializing OpenAI');
     const configuration = new Configuration({
       apiKey: openaiApiKey,
     })
     const openai = new OpenAIApi(configuration)
 
+    console.log('Fetching restaurant data');
     // Get restaurant data with error handling
     const { data: restaurant, error: restaurantError } = await supabaseClient
       .from('restaurants')
@@ -51,6 +58,7 @@ serve(async (req) => {
       .single()
 
     if (restaurantError) {
+      console.error('Restaurant fetch error:', restaurantError);
       throw new Error(`Failed to fetch restaurant data: ${restaurantError.message}`)
     }
 
@@ -66,7 +74,7 @@ serve(async (req) => {
     
     Please provide helpful and friendly responses based on this context.`
 
-    console.log('Sending request to OpenAI...')
+    console.log('Sending request to OpenAI');
     
     // Get AI response with error handling
     const completion = await openai.createChatCompletion({
@@ -85,15 +93,19 @@ serve(async (req) => {
 
     const aiResponse = completion.data.choices[0].message.content
 
+    console.log('Sending successful response');
     return new Response(
       JSON.stringify({ response: aiResponse }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 // Explicitly set 200 status for successful response
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        },
+        status: 200
       },
     )
   } catch (error) {
-    console.error('Error in chat function:', error)
+    console.error('Error in chat function:', error);
     
     return new Response(
       JSON.stringify({ 
