@@ -11,18 +11,13 @@ const configuration = new Configuration({ apiKey: OPENAI_API_KEY })
 const openai = new OpenAIApi(configuration)
 
 serve(async (req) => {
-  // Handle CORS preflight requests
+  // Handle CORS
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { 
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json'
-      }
-    })
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { message, restaurantId, reviews } = await req.json()
+    const { message } = await req.json()
 
     if (!message) {
       return new Response(
@@ -37,20 +32,22 @@ serve(async (req) => {
       )
     }
 
+    console.log('Sending message to OpenAI:', message)
+
     const completion = await openai.createChatCompletion({
       model: "gpt-4",
       messages: [
         { 
           role: "system", 
-          content: `You are a helpful AI assistant for a restaurant${
-            reviews ? ` with ${reviews.length} reviews` : ''
-          }. You help answer questions about reviews, menu items, and general restaurant management.`
+          content: "You are a helpful AI assistant."
         },
         { role: "user", content: message }
       ],
       temperature: 0.7,
       max_tokens: 500,
     })
+
+    console.log('Received response from OpenAI')
 
     const aiResponse = completion.data.choices[0].message?.content
     if (!aiResponse) {

@@ -3,7 +3,6 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// Type declarations for Vite's import.meta.env
 interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL: string;
   readonly VITE_SUPABASE_ANON_KEY: string;
@@ -14,11 +13,9 @@ interface ImportMeta {
 }
 
 export default defineConfig(({ mode }) => {
-  // Load environment variables safely
   const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
   const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || '';
 
-  // Validate required environment variables
   if (!supabaseUrl || !supabaseAnonKey) {
     console.warn('Missing required environment variables');
   }
@@ -29,15 +26,14 @@ export default defineConfig(({ mode }) => {
       port: 8080,
       proxy: {
         '/api/chat': {
-          target: 'https://mwxtirzaskicmjdqzytd.supabase.co/functions/v1/chat',
+          target: `${supabaseUrl}/functions/v1/chat`,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/chat/, ''),
           secure: false,
           ws: true,
           headers: {
-            'apikey': supabaseAnonKey,
             'Authorization': `Bearer ${supabaseAnonKey}`,
-            'Content-Type': 'application/json'
+            'apikey': supabaseAnonKey
           }
         }
       }

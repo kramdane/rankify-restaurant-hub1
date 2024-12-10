@@ -1,28 +1,20 @@
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
-interface UseChatApiProps {
-  restaurantId?: number;
-  reviews?: any[];
-}
-
-export const useChatApi = ({ restaurantId, reviews }: UseChatApiProps) => {
+export const useChatApi = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const sendMessage = async (message: string) => {
     setIsProcessing(true);
     try {
+      console.log('Sending message:', message);
+      
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          message,
-          restaurantId,
-          reviews 
-        }),
+        body: JSON.stringify({ message }),
       });
 
       if (!response.ok) {
@@ -32,6 +24,7 @@ export const useChatApi = ({ restaurantId, reviews }: UseChatApiProps) => {
       }
 
       const data = await response.json();
+      console.log('Received response:', data);
       
       if (!data.response) {
         console.error('Invalid response format:', data);
