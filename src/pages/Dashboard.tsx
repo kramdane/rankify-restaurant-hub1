@@ -160,7 +160,9 @@ const Dashboard = () => {
           <RecentReviews restaurantId={restaurant?.id} />
         </div>
       </div>
-      <FloatingChatBot restaurantId={restaurant?.id} />
+      <div className="fixed bottom-4 right-4">
+        <SimpleChat />
+      </div>
     </DashboardLayout>
   );
 };
