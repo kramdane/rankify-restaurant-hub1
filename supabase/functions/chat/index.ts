@@ -1,13 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 import { Configuration, OpenAIApi } from "https://esm.sh/openai@3.1.0"
-import { corsHeaders } from '../_shared/cors.ts'
+import { corsHeaders, handleCors } from '../_shared/cors.ts'
 
 serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  // Handle CORS preflight
+  const corsResponse = handleCors(req);
+  if (corsResponse) return corsResponse;
 
   try {
     const { message, restaurantId, reviews } = await req.json()
@@ -82,7 +81,7 @@ serve(async (req) => {
       JSON.stringify({ response: aiResponse }),
       { 
         headers: { 
-          ...corsHeaders, 
+          ...corsHeaders,
           'Content-Type': 'application/json',
         },
         status: 200 
@@ -99,7 +98,7 @@ serve(async (req) => {
       }),
       { 
         headers: { 
-          ...corsHeaders, 
+          ...corsHeaders,
           'Content-Type': 'application/json'
         },
         status: 500 

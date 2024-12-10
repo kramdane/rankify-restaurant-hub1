@@ -120,7 +120,9 @@ export const ChatBot = ({ restaurantId }: { restaurantId?: number }) => {
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+              'Origin': window.location.origin
             },
+            credentials: 'include',
             body: JSON.stringify({
               message: userMessage,
               restaurantId,
