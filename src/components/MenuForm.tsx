@@ -125,7 +125,6 @@ export function MenuForm({ onSubmit, onCancel }: MenuFormProps) {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={productForm.control}
                   name="description"
@@ -139,7 +138,6 @@ export function MenuForm({ onSubmit, onCancel }: MenuFormProps) {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={productForm.control}
                   name="price"
@@ -153,7 +151,6 @@ export function MenuForm({ onSubmit, onCancel }: MenuFormProps) {
                     </FormItem>
                   )}
                 />
-
                 <div className="flex justify-end gap-4">
                   <Button 
                     type="button" 
