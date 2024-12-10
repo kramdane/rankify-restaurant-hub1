@@ -7,6 +7,8 @@ export const useChatApi = () => {
   const sendMessage = async (message: string) => {
     setIsProcessing(true);
     try {
+      console.log('Sending message:', message);
+      
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -15,21 +17,24 @@ export const useChatApi = () => {
         body: JSON.stringify({ message }),
       });
 
+      // Log the raw response for debugging
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+
+      // Try to parse the response as JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse response as JSON:', parseError);
+        throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}...`);
+      }
+
+      console.log('Parsed response data:', data);
+
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Server response:', errorText);
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const responseText = await response.text();
-        console.error('Non-JSON response:', responseText);
-        throw new Error('Response is not JSON');
-      }
-
-      const data = await response.json();
-      console.log('Received data:', data);
 
       if (!data.isConfigured) {
         toast.error('OpenAI API key is not configured. Please add it in the project settings.');
@@ -43,7 +48,7 @@ export const useChatApi = () => {
       return data.response;
     } catch (error) {
       console.error('Error in sendMessage:', error);
-      toast.error('Failed to send message. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Failed to send message. Please try again.');
       throw error;
     } finally {
       setIsProcessing(false);
