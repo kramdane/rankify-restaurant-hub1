@@ -10,14 +10,23 @@ serve(async (req) => {
   }
 
   try {
+    // Test OpenAI connection
+    if (!Deno.env.get('OPENAI_API_KEY')) {
+      console.error('OpenAI API key is not set')
+      throw new Error('OpenAI API key is not configured')
+    }
+
     const { message } = await req.json()
+    console.log('Received message:', message)
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",  // Changed from gpt-4o to gpt-4
+      model: "gpt-4",
       messages: [{ role: "user", content: message }],
       temperature: 0.7,
       max_tokens: 500,
     })
+
+    console.log('OpenAI response received:', completion.choices[0]?.message)
 
     const response = completion.choices[0]?.message?.content || 'Sorry, I could not process that.'
 
@@ -33,7 +42,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in chat function:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: 'An error occurred while processing your request'
+      }),
       {
         status: 500,
         headers: {

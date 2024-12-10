@@ -16,19 +16,28 @@ export const useChatApi = () => {
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server response:', errorText);
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
+        const responseText = await response.text();
+        console.error('Non-JSON response:', responseText);
         throw new Error('Response is not JSON');
       }
 
       const data = await response.json();
+      console.log('Received data:', data);
 
-      if (!data.response) {
+      if (!data.response && !data.error) {
         console.error('Invalid response format:', data);
         throw new Error('Invalid response format');
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
       }
 
       return data.response;
