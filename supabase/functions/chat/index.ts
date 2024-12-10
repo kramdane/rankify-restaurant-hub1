@@ -9,34 +9,39 @@ serve(async (req) => {
   }
 
   try {
+    const { message } = await req.json()
+
+    if (!message) {
+      return new Response(
+        JSON.stringify({ error: 'Message is required', isConfigured: true }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      )
+    }
+
     // Validate OpenAI API key
     const apiKey = Deno.env.get('OPENAI_API_KEY')
     if (!apiKey) {
-      console.error('OpenAI API key is not configured')
       return new Response(
         JSON.stringify({ 
           error: 'OpenAI API key is not configured',
           isConfigured: false 
         }),
         {
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 500,
         }
       )
     }
 
-    // Initialize OpenAI with the API key from Supabase secrets
-    const openai = new OpenAI(apiKey)
-    
-    // Parse the request body
-    const { message } = await req.json()
+    // Initialize OpenAI with the API key
+    const openai = new OpenAI({ apiKey })
     
     // Create chat completion
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-3.5-turbo", // Changed back to a valid model name
       messages: [
         {"role": "system", "content": "You are a helpful restaurant assistant. You help with reviews, menu management, and customer service."},
         {"role": "user", "content": message}
@@ -46,38 +51,35 @@ serve(async (req) => {
     })
 
     // Extract and validate the response
-    const response = completion.choices[0]?.message?.content || 'Sorry, I could not process that.'
+    const response = completion.choices[0]?.message?.content
+    if (!response) {
+      throw new Error('No response from OpenAI')
+    }
 
-    // Return JSON response with CORS headers
+    // Return successful response
     return new Response(
       JSON.stringify({ 
         response,
         isConfigured: true 
       }),
       {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-      },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
     )
   } catch (error) {
     console.error('Error in chat function:', error)
     
-    // Return error response with CORS headers
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        isConfigured: false,
+        isConfigured: true,
         details: 'An error occurred while processing your request'
       }),
       {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
-      },
+      }
     )
   }
 })
