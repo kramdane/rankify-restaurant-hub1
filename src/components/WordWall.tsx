@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Search, RefreshCw } from "lucide-react";
 import { Button } from "./ui/button";
@@ -18,28 +18,35 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import { toast } from "sonner";
+import { ReviewDialog } from "./ReviewDialog";
 
 interface Word {
   word: string;
   sentiment: "positive" | "negative" | "neutral";
   count: number;
+  reviews: any[];
 }
 
-const sentimentColors = {
-  positive: "bg-success hover:bg-success/90",
-  negative: "bg-destructive hover:bg-destructive/90",
-  neutral: "bg-muted hover:bg-muted/90",
-};
+interface Position {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+}
 
 const textColors = {
-  positive: "text-success-foreground",
-  negative: "text-destructive-foreground",
-  neutral: "text-muted-foreground",
+  positive: "text-green-600",
+  negative: "text-red-600",
+  neutral: "text-gray-900",
 };
 
 export const WordWall = ({ restaurantId }: { restaurantId?: string }) => {
   const [filter, setFilter] = useState<"all" | "positive" | "negative" | "neutral">("all");
   const [search, setSearch] = useState("");
+  const [positions, setPositions] = useState<{ [key: string]: Position }>({});
+  const [hoveredWord, setHoveredWord] = useState<string | null>(null);
+  const [selectedReview, setSelectedReview] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { data: words, isLoading, refetch, error } = useQuery({
     queryKey: ["word-wall", restaurantId],
@@ -65,6 +72,50 @@ export const WordWall = ({ restaurantId }: { restaurantId?: string }) => {
     },
     enabled: !!restaurantId,
   });
+
+  useEffect(() => {
+    if (!words) return;
+
+    // Initialize random positions for new words
+    const containerWidth = window.innerWidth * 0.8;
+    const containerHeight = 400;
+
+    const newPositions: { [key: string]: Position } = {};
+    words.forEach((word) => {
+      if (!positions[word.word]) {
+        newPositions[word.word] = {
+          x: Math.random() * (containerWidth - 100),
+          y: Math.random() * (containerHeight - 40),
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+        };
+      }
+    });
+
+    setPositions((prev) => ({ ...prev, ...newPositions }));
+
+    // Animation loop
+    const animate = () => {
+      setPositions((prev) => {
+        const updated = { ...prev };
+        Object.entries(updated).forEach(([word, pos]) => {
+          if (hoveredWord === word) return;
+
+          // Update position
+          pos.x += pos.vx;
+          pos.y += pos.vy;
+
+          // Bounce off walls
+          if (pos.x <= 0 || pos.x >= containerWidth - 100) pos.vx *= -1;
+          if (pos.y <= 0 || pos.y >= containerHeight - 40) pos.vy *= -1;
+        });
+        return updated;
+      });
+    };
+
+    const intervalId = setInterval(animate, 50);
+    return () => clearInterval(intervalId);
+  }, [words, hoveredWord]);
 
   const filteredWords = words?.filter((word) => {
     const matchesFilter = filter === "all" || word.sentiment === filter;
@@ -119,18 +170,28 @@ export const WordWall = ({ restaurantId }: { restaurantId?: string }) => {
         </div>
       ) : (
         <TooltipProvider>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="relative h-[400px] border rounded-lg overflow-hidden">
             {filteredWords?.map((word, index) => (
               <Tooltip key={index}>
                 <TooltipTrigger asChild>
                   <button
-                    className={`p-4 rounded-lg ${sentimentColors[word.sentiment]} ${
+                    className={`absolute p-2 transition-all duration-200 ${
                       textColors[word.sentiment]
-                    } text-sm font-medium transition-colors duration-200 w-full text-center relative group`}
+                    } text-sm font-medium hover:scale-110`}
+                    style={{
+                      left: positions[word.word]?.x,
+                      top: positions[word.word]?.y,
+                      transform: hoveredWord === word.word ? "scale(1.1)" : "scale(1)",
+                    }}
+                    onMouseEnter={() => setHoveredWord(word.word)}
+                    onMouseLeave={() => setHoveredWord(null)}
+                    onClick={() => {
+                      if (word.reviews?.[0]) {
+                        setSelectedReview(word.reviews[0]);
+                        setIsDialogOpen(true);
+                      }
+                    }}
                   >
-                    <span className="absolute top-1 right-2 text-xs opacity-50">
-                      {word.count}x
-                    </span>
                     {word.word}
                   </button>
                 </TooltipTrigger>
@@ -145,6 +206,12 @@ export const WordWall = ({ restaurantId }: { restaurantId?: string }) => {
           </div>
         </TooltipProvider>
       )}
+
+      <ReviewDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        review={selectedReview}
+      />
     </div>
   );
 };
