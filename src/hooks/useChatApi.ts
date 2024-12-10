@@ -17,15 +17,22 @@ export const useChatApi = () => {
         body: JSON.stringify({ message }),
       });
 
+      console.log('Response status:', response.status);
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Server response:', errorText);
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const data = await response.json();
-      console.log('Received response:', data);
-      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error('Failed to parse response:', e);
+        throw new Error('Invalid JSON response from server');
+      }
+
       if (!data.response) {
         console.error('Invalid response format:', data);
         throw new Error('Invalid response format');
