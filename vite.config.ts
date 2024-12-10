@@ -15,8 +15,13 @@ interface ImportMeta {
 
 export default defineConfig(({ mode }) => {
   // Load environment variables safely
-  const supabaseUrl = process.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || '';
+
+  // Validate required environment variables
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('Missing required environment variables');
+  }
 
   return {
     server: {
@@ -26,13 +31,13 @@ export default defineConfig(({ mode }) => {
         '/api/chat': {
           target: supabaseUrl,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/chat/, '/functions/v1/chat'),
+          rewrite: (path: string) => path.replace(/^\/api\/chat/, '/functions/v1/chat'),
           headers: {
             'apikey': supabaseAnonKey,
-            'Authorization': `Bearer ${supabaseAnonKey}`,
-          },
-        },
-      },
+            'Authorization': `Bearer ${supabaseAnonKey}`
+          } as Record<string, string>
+        }
+      }
     },
     plugins: [
       react(),
