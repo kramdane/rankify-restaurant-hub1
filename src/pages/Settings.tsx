@@ -1,25 +1,9 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { supabase } from "@/lib/supabase";
+import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
-import { SettingsForm } from "@/components/settings/SettingsForm";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { SettingsForm } from "@/components/settings/SettingsForm";
 import { PasswordChangeSection } from "@/components/settings/PasswordChangeSection";
 
 export default function Settings() {
@@ -47,10 +31,29 @@ export default function Settings() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-4xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold mb-6">Settings</h1>
-        <SettingsForm userId={user.id} />
-        <PasswordChangeSection />
+      <div className="p-6 space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+          <p className="text-muted mt-2">Manage your restaurant profile and preferences</p>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <Card className="bg-white shadow-sm">
+              <CardContent className="p-6">
+                <SettingsForm userId={user.id} />
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="lg:col-span-1">
+            <Card className="bg-white shadow-sm">
+              <CardContent className="p-6">
+                <PasswordChangeSection />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );
