@@ -83,76 +83,39 @@ serve(async (req) => {
 
         const positiveReviews = reviewTexts.filter(r => r.rating >= 4);
         const negativeReviews = reviewTexts.filter(r => r.rating <= 2);
-        const mixedReviews = reviewTexts.filter(r => r.rating === 3);
 
-        contextData = 'Based on your reviews:\n\n';
+        contextData = 'Based on reviews:\n';
         
         if (positiveReviews.length > 0) {
-          contextData += 'Positive aspects mentioned in good reviews:\n';
+          contextData += '\nPositive points:\n';
           positiveReviews.forEach(review => {
-            if (review.comment) contextData += `- "${review.comment}"\n`;
+            if (review.comment) contextData += `- ${review.comment}\n`;
           });
         }
 
         if (negativeReviews.length > 0) {
-          contextData += '\nAreas for improvement from critical reviews:\n';
+          contextData += '\nAreas for improvement:\n';
           negativeReviews.forEach(review => {
-            if (review.comment) contextData += `- "${review.comment}"\n`;
-          });
-        }
-
-        if (mixedReviews.length > 0) {
-          contextData += '\nMixed feedback (3-star reviews):\n';
-          mixedReviews.forEach(review => {
-            if (review.comment) contextData += `- "${review.comment}"\n`;
+            if (review.comment) contextData += `- ${review.comment}\n`;
           });
         }
       } else {
-        contextData = "You don't have any reviews yet to analyze.";
+        contextData = "No reviews yet.";
       }
-    } else if (lowerMessage.includes('google') && lowerMessage.includes('business')) {
-      contextData = restaurant.google_business_url 
-        ? `Your Google Business URL is: ${restaurant.google_business_url}`
-        : "You haven't set up your Google Business URL yet. You can add it in the settings.";
-    } else if (lowerMessage.includes('facebook')) {
-      contextData = restaurant.facebook_url
-        ? `Your Facebook URL is: ${restaurant.facebook_url}`
-        : "You haven't set up your Facebook URL yet. You can add it in the settings.";
-    } else if (lowerMessage.includes('tripadvisor')) {
-      contextData = restaurant.tripadvisor_url
-        ? `Your TripAdvisor URL is: ${restaurant.tripadvisor_url}`
-        : "You haven't set up your TripAdvisor URL yet. You can add it in the settings.";
-    } else if (lowerMessage.includes('business') && lowerMessage.includes('hour')) {
-      contextData = restaurant.business_hours
-        ? `Your business hours are: ${JSON.stringify(restaurant.business_hours, null, 2)}`
-        : "You haven't set up your business hours yet. You can add them in the settings.";
-    } else if (lowerMessage.includes('address')) {
-      contextData = restaurant.address
-        ? `Your business address is: ${restaurant.address}`
-        : "You haven't set up your business address yet. You can add it in the settings.";
-    } else if (lowerMessage.includes('phone')) {
-      contextData = restaurant.phone
-        ? `Your phone number is: ${restaurant.phone}`
-        : "You haven't set up your phone number yet. You can add it in the settings.";
-    } else if (lowerMessage.includes('email')) {
-      contextData = restaurant.email
-        ? `Your email address is: ${restaurant.email}`
-        : "You haven't set up your email address yet. You can add it in the settings.";
-    } else if (lowerMessage.includes('category') || lowerMessage.includes('type of restaurant')) {
-      contextData = restaurant.business_category
-        ? `Your restaurant category is: ${restaurant.business_category}`
-        : "You haven't set up your business category yet. You can add it in the settings.";
     } else if (lowerMessage.includes('review') || lowerMessage.includes('rating')) {
       if (reviews.length > 0) {
         const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
         const recentReviews = reviews.slice(0, 3);
-        contextData = `You have ${reviews.length} reviews with an average rating of ${averageRating.toFixed(1)}. Here are your most recent reviews:\n`;
+        contextData = `${reviews.length} reviews, ${averageRating.toFixed(1)}★ average.\n\nLatest reviews:\n`;
         recentReviews.forEach(review => {
           contextData += `- ${review.reviewer_name}: ${review.rating}★ - "${review.comment}"\n`;
         });
       } else {
-        contextData = "You don't have any reviews yet.";
+        contextData = "No reviews yet.";
       }
+    } else {
+      // For other queries, use minimal context
+      contextData = `Restaurant: ${restaurant.name}`;
     }
 
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -173,11 +136,11 @@ serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: `You are a helpful restaurant management assistant. You have access to the restaurant's data and can provide accurate information about the business. The restaurant name is "${restaurant.name}". Be concise and friendly in your responses. When analyzing reviews, focus on providing actionable insights and clear patterns in customer feedback.`
+          content: `You are a concise restaurant assistant. Keep initial responses brief and direct. Only provide detailed explanations when specifically asked. Format responses with bullet points when listing multiple items. The restaurant name is "${restaurant.name}".`
         },
         {
           role: "user",
-          content: contextData ? `${message}\nHere's the relevant data: ${contextData}` : message
+          content: contextData ? `${message}\nContext: ${contextData}` : message
         }
       ],
       temperature: 0.7,
@@ -192,7 +155,7 @@ serve(async (req) => {
 
     // Log the interaction for debugging
     console.log('Message:', message);
-    console.log('Context Data:', contextData);
+    console.log('Context:', contextData);
     console.log('Response:', response);
 
     return new Response(
