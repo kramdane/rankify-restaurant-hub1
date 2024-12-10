@@ -7,6 +7,15 @@ import { ReviewSubmissionFeedback } from "@/components/reviews/ReviewSubmissionF
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+interface Restaurant {
+  id: string;
+  name: string;
+  preferred_social_media?: string;
+  google_business_url?: string;
+  facebook_url?: string;
+  tripadvisor_url?: string;
+}
+
 export default function ReviewForm() {
   const { restaurantId } = useParams();
   const navigate = useNavigate();
@@ -15,9 +24,7 @@ export default function ReviewForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [rating, setRating] = useState(0);
 
-  console.log("Current restaurantId from params:", restaurantId);
-
-  const { data: restaurant, isLoading: isLoadingRestaurant } = useQuery({
+  const { data: restaurant, isLoading: isLoadingRestaurant } = useQuery<Restaurant>({
     queryKey: ["restaurant", restaurantId],
     queryFn: async () => {
       if (!restaurantId) return null;
