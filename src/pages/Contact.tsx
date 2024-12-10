@@ -30,12 +30,11 @@ const ContactPage = () => {
         throw restaurantError;
       }
 
-      // Now fetch customer reviews for this restaurant, grouped by email
+      // Now fetch customer reviews for this restaurant
       const { data: customerReviews, error: reviewsError } = await supabase
         .from("customer_reviews")
         .select("*")
-        .eq("restaurant_id", restaurant.id)
-        .not('email', 'is', null); // Only get reviews with email addresses
+        .eq("restaurant_id", restaurant.id);
 
       if (reviewsError) {
         toast.error("Failed to load customer reviews");
@@ -43,30 +42,24 @@ const ContactPage = () => {
       }
 
       // Transform the data to match the Contact type
-      // Group by email to ensure unique entries
-      const contactsByEmail = customerReviews.reduce((acc: { [key: string]: any }, review) => {
-        if (review.email && !acc[review.email]) {
-          acc[review.email] = {
-            id: review.review_ids?.[0] || '',
-            firstname: review.reviewer_name?.split(' ')[0] || '',
-            lastname: review.reviewer_name?.split(' ')[1] || '',
-            email: review.email,
-            phone: review.phone || '',
-            addeddate: review.last_review_date || new Date().toISOString(),
-            reviewcount: review.review_count || 0,
-            created_at: review.last_review_date || null,
-            updated_at: review.last_review_date || null,
-            customer_reviews: [{
-              average_rating: review.average_rating || 0,
-              review_count: review.review_count || 0,
-              review_ids: review.review_ids || [],
-            }]
-          };
-        }
-        return acc;
-      }, {});
+      const contacts = customerReviews.map(review => ({
+        id: review.review_ids?.[0] || '', // Using first review ID as contact ID
+        firstname: review.reviewer_name?.split(' ')[0] || '',
+        lastname: review.reviewer_name?.split(' ')[1] || '',
+        email: review.email || '',
+        phone: review.phone || '',
+        addeddate: review.last_review_date || new Date().toISOString(),
+        reviewcount: review.review_count || 0,
+        created_at: review.last_review_date || null,
+        updated_at: review.last_review_date || null,
+        customer_reviews: [{
+          average_rating: review.average_rating || 0,
+          review_count: review.review_count || 0,
+          review_ids: review.review_ids || [],
+        }]
+      }));
 
-      return Object.values(contactsByEmail) as Contact[];
+      return contacts as Contact[];
     },
   });
 
