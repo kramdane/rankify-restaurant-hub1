@@ -25,11 +25,11 @@ export default {
         background: "#F8F9FE",
         foreground: "#1A1F2C",
         primary: {
-          DEFAULT: "#9b87f5",
+          DEFAULT: "#6366F1",
           foreground: "#ffffff",
         },
         secondary: {
-          DEFAULT: "#7E69AB",
+          DEFAULT: "#4F46E5",
           foreground: "#ffffff",
         },
         accent: {
@@ -37,7 +37,7 @@ export default {
           foreground: "#1A1F2C",
         },
         muted: {
-          DEFAULT: "#6E59A5",
+          DEFAULT: "#6B7280",
           foreground: "#F8F9FE",
         },
         destructive: {
