@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Share2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { MenuForm } from "@/components/MenuForm";
 import { useToast } from "@/components/ui/use-toast";
@@ -15,7 +15,6 @@ interface MenuItem {
   description: string;
   price: number;
   category: string;
-  position?: number;
 }
 
 const Menu = () => {
@@ -49,8 +48,7 @@ const Menu = () => {
         .select("*")
         .eq("restaurant_id", restaurant.id)
         .eq("active", true)
-        .order("position", { ascending: true })
-        .order("category", { ascending: true });
+        .order("position", { ascending: true });
       
       if (error) throw error;
       return data;
@@ -59,12 +57,17 @@ const Menu = () => {
   });
 
   const addMenuItem = useMutation({
-    mutationFn: async (item: Omit<MenuItem, "id">) => {
+    mutationFn: async (item: Omit<MenuItem, "id" | "category">) => {
       if (!restaurant?.id) throw new Error("No restaurant found");
       const position = menuItems.length;
       const { data, error } = await supabase
         .from("menu_items")
-        .insert([{ ...item, restaurant_id: restaurant.id, position }])
+        .insert([{ 
+          ...item, 
+          restaurant_id: restaurant.id, 
+          position,
+          category: "Menu Items" 
+        }])
         .select()
         .single();
       
@@ -81,59 +84,29 @@ const Menu = () => {
     },
   });
 
-  const handleAddItem = (item: Omit<MenuItem, "id">) => {
+  const handleAddItem = (item: Omit<MenuItem, "id" | "category">) => {
     addMenuItem.mutate(item);
   };
 
-  const handleShareMenu = async () => {
-    if (!restaurant?.id) return;
-    
-    const shareUrl = `${window.location.origin}/menu/${restaurant.id}`;
-    await navigator.clipboard.writeText(shareUrl);
-    
-    toast({
-      title: "Menu Link Copied!",
-      description: "Share this link with your customers",
-    });
+  const groupedMenuItems = {
+    "Menu Items": menuItems
   };
-
-  const groupedMenuItems = menuItems.reduce((acc: Record<string, MenuItem[]>, item) => {
-    const category = item.category || 'Uncategorized';
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(item);
-    return acc;
-  }, {});
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-foreground">Menu Management</h1>
-          <div className="flex gap-4">
-            <Button
-              variant="outline"
-              onClick={handleShareMenu}
-              className="flex items-center gap-2"
-            >
-              <Share2 className="h-4 w-4" /> Share Menu
-            </Button>
-            <Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
-              <Plus className="h-4 w-4" /> Add Menu Item
-            </Button>
-          </div>
+          <Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" /> Add Menu Item
+          </Button>
         </div>
 
         {showForm && (
-          <Card className="bg-white shadow-sm">
-            <CardHeader>
-              <CardTitle>Add New Menu Item</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <MenuForm onSubmit={handleAddItem} onCancel={() => setShowForm(false)} />
-            </CardContent>
-          </Card>
+          <MenuForm 
+            onSubmit={handleAddItem} 
+            onCancel={() => setShowForm(false)} 
+          />
         )}
 
         <div className="space-y-8">

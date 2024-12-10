@@ -18,13 +18,12 @@ const productFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   price: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, "Price must be a positive number"),
-  category: z.string().min(2, "Category is required"),
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
 
 interface MenuFormProps {
-  onSubmit: (values: { name: string; description: string; price: number; category: string }) => void;
+  onSubmit: (values: { name: string; description: string; price: number }) => void;
   onCancel: () => void;
 }
 
@@ -35,7 +34,6 @@ export function MenuForm({ onSubmit, onCancel }: MenuFormProps) {
       name: "",
       description: "",
       price: "",
-      category: "",
     },
   });
 
@@ -44,7 +42,6 @@ export function MenuForm({ onSubmit, onCancel }: MenuFormProps) {
       name: values.name,
       description: values.description,
       price: Number(values.price),
-      category: values.category,
     });
     form.reset();
   };
@@ -65,19 +62,6 @@ export function MenuForm({ onSubmit, onCancel }: MenuFormProps) {
                   <FormLabel>Name</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter item name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Main Dishes, Appetizers, Desserts" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
