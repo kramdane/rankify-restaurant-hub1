@@ -17,7 +17,7 @@ const ContactPage = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("contacts")
-        .select("*, customer_reviews!left(*)")
+        .select("*, customer_reviews(*)")
         .order("created_at", { ascending: false });
 
       if (error) {

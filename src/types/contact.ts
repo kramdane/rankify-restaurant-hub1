@@ -17,5 +17,5 @@ export interface Contact {
     review_count: number;
     review_ids: string[];
     reviewer_name: string;
-  } | null;
+  }[] | null;
 }
