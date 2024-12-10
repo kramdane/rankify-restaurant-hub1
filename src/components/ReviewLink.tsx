@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Copy } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 interface ReviewLinkProps {
   restaurantId: string;
@@ -10,8 +11,33 @@ interface ReviewLinkProps {
 
 export const ReviewLink = ({ restaurantId }: ReviewLinkProps) => {
   const [isCopied, setIsCopied] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [restaurant, setRestaurant] = useState<any>(null);
 
-  const reviewLink = `${window.location.origin}/review/${restaurantId}`;
+  useEffect(() => {
+    const fetchRestaurant = async () => {
+      console.log("Fetching restaurant with ID:", restaurantId);
+      const { data, error } = await supabase
+        .from('restaurants')
+        .select('*')
+        .eq('id', restaurantId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching restaurant:', error);
+        toast.error('Error generating review link');
+        return;
+      }
+
+      console.log("Found restaurant:", data);
+      setRestaurant(data);
+      setLoading(false);
+    };
+
+    fetchRestaurant();
+  }, [restaurantId]);
+
+  const reviewLink = `${window.location.origin}/review/${restaurant?.id}`;
 
   const copyLink = async () => {
     try {
@@ -23,6 +49,10 @@ export const ReviewLink = ({ restaurantId }: ReviewLinkProps) => {
       toast.error("Failed to copy link");
     }
   };
+
+  if (loading) {
+    return <div>Loading review link...</div>;
+  }
 
   return (
     <div className="flex gap-2">
