@@ -71,11 +71,10 @@ serve(async (req) => {
       max_tokens: 500,
     })
 
-    if (!completion.data.choices[0].message?.content) {
+    const aiResponse = completion.data.choices[0].message?.content
+    if (!aiResponse) {
       throw new Error('No response received from OpenAI')
     }
-
-    const aiResponse = completion.data.choices[0].message.content
 
     // Return response with CORS headers
     return new Response(
