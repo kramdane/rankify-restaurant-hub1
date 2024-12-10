@@ -2,11 +2,15 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tables } from "@/integrations/supabase/types";
+
+type MenuItem = Tables<"menu_items">;
+type Restaurant = Tables<"restaurants">;
 
 const PublicMenu = () => {
   const { restaurantId } = useParams();
 
-  const { data: restaurant } = useQuery({
+  const { data: restaurant } = useQuery<Restaurant>({
     queryKey: ["public-restaurant", restaurantId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -20,7 +24,7 @@ const PublicMenu = () => {
     },
   });
 
-  const { data: menuItems = [] } = useQuery({
+  const { data: menuItems = [] } = useQuery<MenuItem[]>({
     queryKey: ["public-menu-items", restaurantId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -36,7 +40,7 @@ const PublicMenu = () => {
   });
 
   // Group menu items by category
-  const groupedMenuItems = menuItems.reduce((acc: Record<string, any[]>, item) => {
+  const groupedMenuItems = menuItems.reduce((acc: Record<string, MenuItem[]>, item) => {
     const category = item.category || "Uncategorized";
     if (!acc[category]) {
       acc[category] = [];
