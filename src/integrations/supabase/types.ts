@@ -355,7 +355,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      customer_reviews: {
+        Row: {
+          average_rating: number | null
+          email: string | null
+          last_review_date: string | null
+          phone: string | null
+          restaurant_id: string | null
+          review_count: number | null
+          review_ids: string[] | null
+          reviewer_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       handle_chat: {
