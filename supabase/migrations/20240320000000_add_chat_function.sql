@@ -30,22 +30,39 @@ SET search_path = public
 AS $$
 DECLARE
     response TEXT;
-    stored_message_id UUID;
+    latest_review RECORD;
 BEGIN
     -- Store the user message
     INSERT INTO messages (role, content, restaurant_id)
-    VALUES ('user', message, restaurant_id)
-    RETURNING id INTO stored_message_id;
+    VALUES ('user', message, restaurant_id);
 
-    -- Generate response based on the message content
-    IF message ILIKE '%review%' THEN
-        response := 'I can help you manage your reviews. Would you like to see recent reviews or analyze review trends?';
-    ELSIF message ILIKE '%menu%' THEN
-        response := 'I can help you with menu management. Would you like to update your menu items or check current offerings?';
-    ELSIF message ILIKE '%hello%' OR message ILIKE '%hi%' THEN
-        response := 'Hello! How can I assist you with your restaurant management today?';
+    -- Check for review-related queries
+    IF message ILIKE '%last review%' OR message ILIKE '%latest review%' OR message ILIKE '%recent review%' THEN
+        -- Get the most recent review for the restaurant
+        SELECT reviewer_name, rating, comment, created_at
+        INTO latest_review
+        FROM reviews
+        WHERE restaurant_id = $2
+        ORDER BY created_at DESC
+        LIMIT 1;
+
+        IF FOUND THEN
+            response := format(
+                'Your latest review was from %s on %s with a rating of %s stars: "%s"',
+                latest_review.reviewer_name,
+                to_char(latest_review.created_at, 'YYYY-MM-DD'),
+                latest_review.rating,
+                latest_review.comment
+            );
+        ELSE
+            response := 'I couldn''t find any reviews for your restaurant yet.';
+        END IF;
+    ELSIF message ILIKE '%review%' THEN
+        response := 'I can help you with your reviews. Would you like to see your latest review, review statistics, or analyze review trends?';
+    ELSIF message ILIKE '%hello%' OR message ILIKE '%hi%' OR message ILIKE '%hey%' THEN
+        response := 'Hello! I''m your restaurant assistant. I can help you with reviews, menu management, and more. What would you like to know?';
     ELSE
-        response := 'I understand you said: "' || message || '". How can I help you with that?';
+        response := 'I understand you said: "' || message || '". Could you please be more specific about what you''d like to know? I can help with reviews, menu items, or general restaurant management.';
     END IF;
 
     -- Store the assistant response
