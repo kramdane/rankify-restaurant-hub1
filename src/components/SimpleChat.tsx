@@ -7,6 +7,7 @@ import { Loader2, X } from "lucide-react";
 import { useChatApi } from "@/hooks/useChatApi";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 interface Message {
   role: "user" | "assistant";
@@ -74,7 +75,19 @@ export const SimpleChat = () => {
       >
         <X className="h-4 w-4" />
       </Button>
-      <ScrollArea className="h-[400px] pr-4 mt-6">
+
+      <div className="flex items-center gap-3 pb-4 border-b mb-4">
+        <Avatar>
+          <AvatarImage src="/placeholder.svg" />
+          <AvatarFallback>AI</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col">
+          <h3 className="font-semibold">Restaurant Assistant</h3>
+          <p className="text-sm text-muted">Always here to help</p>
+        </div>
+      </div>
+
+      <ScrollArea className="h-[400px] pr-4">
         <div className="space-y-4">
           {messages.map((message, index) => (
             <div
