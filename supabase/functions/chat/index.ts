@@ -12,8 +12,22 @@ serve(async (req) => {
 
   try {
     // Validate OpenAI API key
-    if (!Deno.env.get('OPENAI_API_KEY')) {
-      throw new Error('OpenAI API key is not configured')
+    const apiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!apiKey) {
+      console.error('OpenAI API key is not configured')
+      return new Response(
+        JSON.stringify({ 
+          error: 'OpenAI API key is not configured',
+          isConfigured: false 
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      )
     }
 
     // Parse the request body
@@ -35,7 +49,10 @@ serve(async (req) => {
 
     // Return JSON response with CORS headers
     return new Response(
-      JSON.stringify({ response }),
+      JSON.stringify({ 
+        response,
+        isConfigured: true 
+      }),
       {
         headers: {
           ...corsHeaders,
@@ -50,6 +67,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: error.message,
+        isConfigured: false,
         details: 'An error occurred while processing your request'
       }),
       {

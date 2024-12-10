@@ -31,9 +31,9 @@ export const useChatApi = () => {
       const data = await response.json();
       console.log('Received data:', data);
 
-      if (!data.response && !data.error) {
-        console.error('Invalid response format:', data);
-        throw new Error('Invalid response format');
+      if (!data.isConfigured) {
+        toast.error('OpenAI API key is not configured. Please add it in the project settings.');
+        throw new Error('OpenAI API key not configured');
       }
 
       if (data.error) {
