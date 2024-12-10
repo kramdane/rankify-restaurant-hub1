@@ -74,7 +74,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "You are a sentiment analysis assistant. Extract key words and phrases from the reviews and classify their sentiment. Return a JSON array where each object has these exact properties: word (string), sentiment (one of: positive, negative, or neutral), count (number). Format your response as a plain JSON array, with no markdown formatting or explanation text."
+            content: "Analyze the reviews and extract key words with their sentiments. Return a JSON object with a 'words' array. Each word object should have: 'word' (string), 'sentiment' (string: 'positive', 'negative', or 'neutral'), and 'count' (number). Example: { \"words\": [{ \"word\": \"delicious\", \"sentiment\": \"positive\", \"count\": 3 }] }"
           },
           {
             role: "user",
@@ -83,7 +83,7 @@ serve(async (req) => {
         ],
         temperature: 0.7,
         max_tokens: 1000,
-        response_format: { type: "json_object" } // Ensure JSON response
+        response_format: { type: "json_object" }
       });
 
       const response = completion.choices[0]?.message?.content;
@@ -95,10 +95,12 @@ serve(async (req) => {
 
       let analysis;
       try {
-        // Clean the response string before parsing
-        const cleanResponse = response.replace(/```json\n?|\n?```/g, '').trim();
-        analysis = JSON.parse(cleanResponse);
-        console.log('Successfully parsed OpenAI response');
+        analysis = JSON.parse(response);
+        console.log('Successfully parsed OpenAI response:', analysis);
+        
+        if (!analysis.words || !Array.isArray(analysis.words)) {
+          throw new Error('Invalid response format from OpenAI');
+        }
       } catch (error) {
         console.error('Error parsing OpenAI response:', error);
         console.error('Raw response:', response);
