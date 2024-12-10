@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Contact } from "@/types/contact";
 import { ContactList } from "@/components/contacts/ContactList";
@@ -17,14 +17,7 @@ const ContactPage = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("contacts")
-        .select(`
-          *,
-          customer_reviews (
-            review_count,
-            average_rating,
-            review_ids
-          )
-        `)
+        .select("*, customer_reviews!left(*)")
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -42,18 +35,18 @@ const ContactPage = () => {
     queryFn: async () => {
       if (!selectedContact?.email) return [];
       
-      const { data: reviewIds } = await supabase
+      const { data: customerReview } = await supabase
         .from("customer_reviews")
         .select("review_ids")
         .eq("email", selectedContact.email)
         .single();
 
-      if (!reviewIds?.review_ids?.length) return [];
+      if (!customerReview?.review_ids?.length) return [];
 
       const { data: reviews, error } = await supabase
         .from("reviews")
         .select("*")
-        .in("id", reviewIds.review_ids);
+        .in("id", customerReview.review_ids);
 
       if (error) {
         toast.error("Failed to load review details");
