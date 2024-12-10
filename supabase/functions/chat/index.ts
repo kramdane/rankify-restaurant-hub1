@@ -2,8 +2,6 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { OpenAI } from 'https://deno.land/x/openai@v4.24.0/mod.ts'
 import { corsHeaders } from '../_shared/cors.ts'
 
-const openai = new OpenAI(Deno.env.get('OPENAI_API_KEY') || '')
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -30,6 +28,9 @@ serve(async (req) => {
       )
     }
 
+    // Initialize OpenAI with the API key from Supabase secrets
+    const openai = new OpenAI(apiKey)
+    
     // Parse the request body
     const { message } = await req.json()
     
