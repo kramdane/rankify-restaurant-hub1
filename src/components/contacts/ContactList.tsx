@@ -84,15 +84,12 @@ export const ContactList = ({
         </TableHeader>
         <TableBody>
           {sortedContacts?.map((contact) => (
-            <TableRow key={contact.id}>
-              <TableCell>
-                <button
-                  onClick={() => onContactSelect(contact)}
-                  className="text-primary hover:underline focus:outline-none"
-                >
-                  {contact.firstname} {contact.lastname}
-                </button>
-              </TableCell>
+            <TableRow 
+              key={contact.id}
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => onContactSelect(contact)}
+            >
+              <TableCell>{contact.firstname} {contact.lastname}</TableCell>
               <TableCell>{contact.phone || "-"}</TableCell>
               <TableCell>{contact.email || "-"}</TableCell>
               <TableCell>{new Date(contact.addeddate).toLocaleDateString()}</TableCell>
