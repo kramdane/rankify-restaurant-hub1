@@ -14,6 +14,7 @@ export const useChatApi = () => {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
         },
         body: JSON.stringify({ message }),
       });
@@ -31,7 +32,8 @@ export const useChatApi = () => {
       console.log('Raw response:', responseText);
 
       // Check if response is HTML
-      if (contentType?.includes('text/html') || responseText.includes('<!DOCTYPE html>')) {
+      if (contentType?.includes('text/html') || responseText.includes('<!DOCTYPE html>') || responseText.includes('<html')) {
+        console.error('Received HTML response:', responseText.substring(0, 200));
         throw new Error(`Received HTML response instead of JSON. Status: ${response.status}`);
       }
 

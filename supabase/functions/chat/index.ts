@@ -12,6 +12,7 @@ serve(async (req) => {
     const { message } = await req.json()
 
     if (!message) {
+      console.error('Message is required')
       return new Response(
         JSON.stringify({ 
           error: 'Message is required',
@@ -22,12 +23,20 @@ serve(async (req) => {
           headers: { 
             ...corsHeaders, 
             'Content-Type': 'application/json',
-            'Cache-Control': 'no-store'
+            'Cache-Control': 'no-store',
+            'X-Content-Type-Options': 'nosniff'
           },
           status: 400,
         }
       )
     }
+
+    // Log incoming request details
+    console.log('Processing request:', {
+      method: req.method,
+      headers: Object.fromEntries(req.headers.entries()),
+      message
+    })
 
     // Validate OpenAI API key
     const apiKey = Deno.env.get('OPENAI_API_KEY')
@@ -43,7 +52,8 @@ serve(async (req) => {
           headers: { 
             ...corsHeaders, 
             'Content-Type': 'application/json',
-            'Cache-Control': 'no-store'
+            'Cache-Control': 'no-store',
+            'X-Content-Type-Options': 'nosniff'
           },
           status: 500,
         }
@@ -56,7 +66,7 @@ serve(async (req) => {
     try {
       // Create chat completion
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o",
         messages: [
           {"role": "system", "content": "You are a helpful restaurant assistant. You help with reviews, menu management, and customer service."},
           {"role": "user", "content": message}
@@ -71,6 +81,9 @@ serve(async (req) => {
         throw new Error('No response received from OpenAI')
       }
 
+      // Log successful response
+      console.log('OpenAI response received:', { response })
+
       // Return successful response
       return new Response(
         JSON.stringify({ 
@@ -81,7 +94,8 @@ serve(async (req) => {
           headers: { 
             ...corsHeaders, 
             'Content-Type': 'application/json',
-            'Cache-Control': 'no-store'
+            'Cache-Control': 'no-store',
+            'X-Content-Type-Options': 'nosniff'
           },
           status: 200,
         }
@@ -98,7 +112,8 @@ serve(async (req) => {
           headers: { 
             ...corsHeaders, 
             'Content-Type': 'application/json',
-            'Cache-Control': 'no-store'
+            'Cache-Control': 'no-store',
+            'X-Content-Type-Options': 'nosniff'
           },
           status: 500,
         }
@@ -117,7 +132,8 @@ serve(async (req) => {
         headers: { 
           ...corsHeaders, 
           'Content-Type': 'application/json',
-          'Cache-Control': 'no-store'
+          'Cache-Control': 'no-store',
+          'X-Content-Type-Options': 'nosniff'
         },
         status: 500,
       }
