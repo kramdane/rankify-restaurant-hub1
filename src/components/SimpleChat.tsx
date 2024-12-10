@@ -20,7 +20,6 @@ export const SimpleChat = () => {
   const [isOpen, setIsOpen] = useState(true);
   const { sendMessage, isProcessing } = useChatApi();
 
-  // Get the current user's restaurant
   const { data: user } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
@@ -44,6 +43,23 @@ export const SimpleChat = () => {
     },
     enabled: !!user?.id,
   });
+
+  const formatMessage = (content: string) => {
+    // Format lists and advice
+    return content.split('\n').map((line, index) => {
+      if (line.startsWith('-')) {
+        // Format list items with proper spacing and bullet points
+        return (
+          <div key={index} className="ml-4 my-1 flex items-start">
+            <span className="mr-2">•</span>
+            <span>{line.substring(1).trim()}</span>
+          </div>
+        );
+      }
+      // Add spacing between paragraphs
+      return <div key={index} className="my-1">{line}</div>;
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,10 +128,23 @@ export const SimpleChat = () => {
                     : "bg-primary text-primary-foreground"
                 }`}
               >
-                {message.content}
+                {message.role === "assistant" 
+                  ? formatMessage(message.content)
+                  : message.content}
               </div>
             </div>
           ))}
+          {isProcessing && (
+            <div className="flex justify-start">
+              <div className="bg-secondary max-w-[80%] p-3 rounded-lg">
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                  <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                  <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </ScrollArea>
       <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
