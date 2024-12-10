@@ -15,24 +15,27 @@ export default function ReviewForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [rating, setRating] = useState(0);
 
-  const { data: restaurant } = useQuery({
+  console.log("Current restaurantId from params:", restaurantId);
+
+  const { data: restaurant, isLoading: isLoadingRestaurant } = useQuery({
     queryKey: ["restaurant", restaurantId],
     queryFn: async () => {
       if (!restaurantId) return null;
       
-      // Add console.log to debug the query
-      console.log("Querying restaurant with ID:", restaurantId);
+      console.log("Fetching restaurant with ID:", restaurantId);
       
       const { data, error } = await supabase
         .from("restaurants")
         .select("*")
-        .eq("user_id", restaurantId) // Changed from id to user_id as that's the foreign key
+        .eq("id", restaurantId) // Changed from user_id to id
         .single();
 
       if (error) {
         console.error("Supabase error:", error);
         throw error;
       }
+      
+      console.log("Restaurant data:", data);
       return data;
     },
     enabled: !!restaurantId,
