@@ -1,14 +1,17 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star, MessageSquare, Menu as MenuIcon, TrendingUp, DollarSign } from "lucide-react";
+import { Star, MessageSquare, Menu as MenuIcon, TrendingUp } from "lucide-react";
 import { ReviewsChart } from "@/components/ReviewsChart";
 import { RecentReviews } from "@/components/RecentReviews";
 import { SimpleChat } from "@/components/SimpleChat";
+import { WordWall } from "@/components/WordWall";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { TimeRangeSelect, TimeRange } from "@/components/TimeRangeSelect";
 import { useState } from "react";
 import { addDays, startOfDay, endOfDay } from "date-fns";
+
+// ... keep existing code (imports and other unchanged sections)
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>({
@@ -163,6 +166,15 @@ const Dashboard = () => {
             </Card>
           ))}
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Review Analysis</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <WordWall restaurantId={restaurant?.id} />
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="col-span-1">
