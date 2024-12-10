@@ -20,7 +20,7 @@ serve(async (req) => {
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
       console.error('OpenAI API key not found');
-      throw new Error('OpenAI API key not configured');
+      throw new Error('OpenAI API key not configured. Please set it in the Edge Function secrets.');
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
