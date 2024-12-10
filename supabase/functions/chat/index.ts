@@ -4,53 +4,41 @@ import { Configuration, OpenAIApi } from "https://esm.sh/openai@3.1.0"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Max-Age': '86400',
 }
 
 serve(async (req) => {
-  console.log('Request received:', req.method);
-
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('Handling OPTIONS request');
-    return new Response(null, { 
-      headers: corsHeaders,
-      status: 204
-    });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    console.log('Processing POST request');
     const { message, restaurantId, reviews } = await req.json()
 
-    // Validate required fields
     if (!message) {
       throw new Error('Message is required')
     }
 
-    console.log('Creating Supabase client');
     // Create a Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
-    // Initialize OpenAI with error handling
+    // Initialize OpenAI
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
     if (!openaiApiKey) {
       throw new Error('OpenAI API key not configured')
     }
 
-    console.log('Initializing OpenAI');
     const configuration = new Configuration({
       apiKey: openaiApiKey,
     })
     const openai = new OpenAIApi(configuration)
 
-    console.log('Fetching restaurant data');
-    // Get restaurant data with error handling
+    // Get restaurant data
     const { data: restaurant, error: restaurantError } = await supabaseClient
       .from('restaurants')
       .select('*')
@@ -58,7 +46,6 @@ serve(async (req) => {
       .single()
 
     if (restaurantError) {
-      console.error('Restaurant fetch error:', restaurantError);
       throw new Error(`Failed to fetch restaurant data: ${restaurantError.message}`)
     }
 
@@ -74,9 +61,7 @@ serve(async (req) => {
     
     Please provide helpful and friendly responses based on this context.`
 
-    console.log('Sending request to OpenAI');
-    
-    // Get AI response with error handling
+    // Get AI response
     const completion = await openai.createChatCompletion({
       model: "gpt-4",
       messages: [
@@ -93,28 +78,24 @@ serve(async (req) => {
 
     const aiResponse = completion.data.choices[0].message.content
 
-    console.log('Sending successful response');
+    // Return response with CORS headers
     return new Response(
       JSON.stringify({ response: aiResponse }),
-      {
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json'
-        },
-        status: 200
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
       },
     )
   } catch (error) {
-    console.error('Error in chat function:', error);
-    
+    // Return error response with CORS headers
     return new Response(
       JSON.stringify({ 
         error: error instanceof Error ? error.message : 'An unexpected error occurred',
         details: error instanceof Error ? error.stack : undefined
       }),
-      {
-        status: 500,
+      { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500 
       },
     )
   }
