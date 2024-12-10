@@ -4,7 +4,7 @@ import OpenAI from 'openai';
 
 // Initialize OpenAI with your API key
 const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY, // You'll need to add this to your .env file
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
   dangerouslyAllowBrowser: true // Note: This is only for development
 });
 
@@ -31,7 +31,7 @@ export const useChatApi = () => {
             content: message
           }
         ],
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o",
       });
 
       const response = completion.choices[0]?.message?.content;
