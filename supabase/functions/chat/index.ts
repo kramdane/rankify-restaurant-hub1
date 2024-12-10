@@ -27,7 +27,8 @@ serve(async (req) => {
       { 
         headers: { 
           ...corsHeaders,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': req.headers.get('Origin') || ALLOWED_ORIGINS[0],
         },
         status: 401 
       }
