@@ -5,7 +5,7 @@ export const DashboardPreview = () => {
         <div className="relative">
           <div className="rounded-lg overflow-hidden shadow-2xl">
             <img
-              src="/lovable-uploads/b9429ec9-eb27-42d2-ab5b-a8098a2403b2.png"
+              src="/lovable-uploads/104edc26-7afd-4a97-8330-28b93c6d70b4.png"
               alt="Rankify Dashboard"
               className="w-full h-auto"
             />
