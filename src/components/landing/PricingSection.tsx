@@ -16,13 +16,14 @@ export const PricingSection = () => {
           <Card>
             <CardHeader>
               <CardTitle>Starter</CardTitle>
-              <div className="text-3xl font-bold">$29/mo</div>
-              <CardDescription>Perfect for small businesses</CardDescription>
+              <div className="text-3xl font-bold">$49.99/mo</div>
+              <CardDescription>Ideal for small businesses</CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-left">
-                <li>✅ Up to 100 reviews/month</li>
+                <li>✅ Up to 300 reviews/month</li>
                 <li>✅ Basic analytics</li>
+                <li>✅ 1 campaign</li>
                 <li>✅ Email support</li>
               </ul>
             </CardContent>
@@ -31,14 +32,15 @@ export const PricingSection = () => {
             <CardHeader>
               <CardTitle>Pro</CardTitle>
               <div className="text-3xl font-bold">$99/mo</div>
-              <CardDescription>For growing businesses</CardDescription>
+              <CardDescription>Perfect for growing businesses</CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-left">
                 <li>✅ Unlimited reviews</li>
                 <li>✅ Advanced analytics</li>
                 <li>✅ Priority support</li>
-                <li>✅ Custom branding</li>
+                <li>✅ Unlimited campaigns</li>
+                <li>✅ Access to Rankify Community</li>
               </ul>
             </CardContent>
           </Card>
@@ -51,9 +53,8 @@ export const PricingSection = () => {
             <CardContent>
               <ul className="space-y-2 text-left">
                 <li>✅ All Pro features</li>
-                <li>✅ Custom integration</li>
+                <li>✅ Custom integrations</li>
                 <li>✅ Dedicated support</li>
-                <li>✅ SLA guarantee</li>
               </ul>
             </CardContent>
           </Card>
