@@ -6,6 +6,8 @@ import { StatsCards } from "@/components/dashboard/StatsCards";
 import { AnalyticsSection } from "@/components/dashboard/AnalyticsSection";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { WordWall } from "@/components/WordWall";
+import { SimpleChat } from "@/components/SimpleChat";
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>({
@@ -113,6 +115,11 @@ const Dashboard = () => {
         />
 
         <AnalyticsSection timeRange={timeRange} restaurantId={restaurant?.id} />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <WordWall restaurantId={restaurant?.id} />
+          <SimpleChat />
+        </div>
       </div>
     </DashboardLayout>
   );
