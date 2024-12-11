@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { BusinessInformationSection } from "./BusinessInformationSection";
 import { SocialMediaSection } from "./SocialMediaSection";
 import { settingsFormSchema, type SettingsFormValues } from "./settingsFormSchema";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 interface SettingsFormProps {
   userId: string;
@@ -35,16 +36,22 @@ export function SettingsForm({ userId }: SettingsFormProps) {
   const { isLoading } = useQuery({
     queryKey: ["restaurant", userId],
     queryFn: async () => {
+      console.log("Fetching restaurant data for user:", userId);
       const { data, error } = await supabase
         .from("restaurants")
         .select("*")
         .eq("user_id", userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching restaurant data:", error);
+        throw error;
+      }
+      
+      console.log("Fetched restaurant data:", data);
       
       if (data) {
-        // Update form with the fetched data
+        // Update form with the fetched data, handling null values
         form.reset({
           name: data.name || "",
           owner_name: data.owner_name || "",
@@ -96,12 +103,17 @@ export function SettingsForm({ userId }: SettingsFormProps) {
       toast.success("Settings saved successfully");
     },
     onError: (error) => {
+      console.error("Error saving settings:", error);
       toast.error("Failed to save settings: " + error.message);
     },
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   const onSubmit = (values: SettingsFormValues) => {
@@ -113,8 +125,12 @@ export function SettingsForm({ userId }: SettingsFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <BusinessInformationSection form={form} />
         <SocialMediaSection form={form} />
-        <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-          Save Changes
+        <Button 
+          type="submit" 
+          className="w-full bg-primary hover:bg-primary/90"
+          disabled={mutation.isPending}
+        >
+          {mutation.isPending ? "Saving..." : "Save Changes"}
         </Button>
       </form>
     </Form>
