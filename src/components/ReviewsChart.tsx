@@ -6,7 +6,7 @@ import { LoadingSpinner } from "./LoadingSpinner";
 
 interface ReviewsChartProps {
   timeRange: TimeRange;
-  restaurantId?: number;
+  restaurantId?: number | string;
 }
 
 export const ReviewsChart = ({ timeRange, restaurantId }: ReviewsChartProps) => {
@@ -17,21 +17,29 @@ export const ReviewsChart = ({ timeRange, restaurantId }: ReviewsChartProps) => 
       
       const { data, error } = await supabase
         .from("reviews")
-        .select("rating, created_at")
-        .eq("reviews.restaurant_id", restaurantId)
+        .select("rating")
+        .eq("restaurant_id", restaurantId)
         .gte("created_at", timeRange.start.toISOString())
         .lte("created_at", timeRange.end.toISOString());
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching reviews:", error);
+        throw error;
+      }
 
-      // Process data to get rating distribution
+      // Initialize distribution array with zeros for ratings 1-5
       const distribution = Array(5).fill(0);
+      
+      // Count occurrences of each rating
       data?.forEach((review) => {
-        distribution[review.rating - 1]++;
+        if (review.rating >= 1 && review.rating <= 5) {
+          distribution[review.rating - 1]++;
+        }
       });
 
+      // Transform to chart data format
       return distribution.map((count, index) => ({
-        rating: index + 1,
+        rating: `${index + 1} Star${count !== 1 ? 's' : ''}`,
         count,
       }));
     },
@@ -46,15 +54,42 @@ export const ReviewsChart = ({ timeRange, restaurantId }: ReviewsChartProps) => 
     );
   }
 
+  if (!reviewStats?.length) {
+    return (
+      <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+        No reviews data available
+      </div>
+    );
+  }
+
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={reviewStats} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="rating" />
-          <YAxis allowDecimals={false} />
-          <Tooltip />
-          <Bar dataKey="count" fill="#3b82f6" />
+          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+          <XAxis 
+            dataKey="rating"
+            className="text-muted-foreground text-xs"
+          />
+          <YAxis 
+            allowDecimals={false}
+            className="text-muted-foreground text-xs"
+          />
+          <Tooltip 
+            contentStyle={{ 
+              backgroundColor: 'hsl(var(--background))',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: '6px'
+            }}
+            labelStyle={{
+              color: 'hsl(var(--foreground))'
+            }}
+          />
+          <Bar 
+            dataKey="count" 
+            fill="hsl(var(--primary))"
+            radius={[4, 4, 0, 0]}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>
