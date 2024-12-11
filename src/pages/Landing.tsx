@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, Star, Users, MessageSquare, Gift } from "lucide-react";
+import { ArrowRight, Star, MessageSquare, Gift, ChevronRight, Shield, Zap, LineChart } from "lucide-react";
+import Header from "@/components/Header";
 import {
   Card,
   CardContent,
@@ -12,36 +13,48 @@ import {
 const Landing = () => {
   return (
     <div className="min-h-screen bg-background">
+      <Header />
+      
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-accent py-20 md:py-32">
+      <section className="relative pt-32 pb-20 md:pt-40 md:pb-32">
         <div className="container px-4 md:px-6">
-          <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
-            <div className="flex flex-col justify-center space-y-4">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                  Your Customers Are Your Crown
-                </h1>
-                <p className="max-w-[600px] text-muted md:text-xl">
-                  When Was the Last Time You Asked for Their Opinion? Rankify helps local businesses collect reviews, engage customers, and build loyalty effortlessly.
-                </p>
-              </div>
-              <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <Link to="/register">
-                  <Button size="lg" className="gap-2">
-                    Get Started for Free
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-                <Button variant="outline" size="lg" asChild>
-                  <Link to="#how-it-works">Discover How It Works</Link>
-                </Button>
-              </div>
+          <div className="flex flex-col items-center text-center space-y-8">
+            <div className="space-y-4 max-w-3xl">
+              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                Your Customers Are Your Crown
+                <span className="block text-[#8B5CF6]">When Was the Last Time You Asked for Their Opinion?</span>
+              </h1>
+              <p className="max-w-[600px] mx-auto text-muted text-lg md:text-xl">
+                Rankify helps local businesses collect reviews, engage customers, and build loyalty effortlessly.
+              </p>
             </div>
-            <div className="flex items-center justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 min-[400px]:flex-row">
+              <Link to="/register">
+                <Button size="lg" className="gap-2">
+                  Get Started for Free
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Button variant="outline" size="lg" asChild>
+                <Link to="#how-it-works" className="gap-2">
+                  Discover How It Works
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Dashboard Preview */}
+      <section className="py-12 md:py-24">
+        <div className="container px-4 md:px-6">
+          <div className="relative">
+            <div className="rounded-lg overflow-hidden shadow-2xl">
               <img
-                alt="Dashboard Preview"
-                className="aspect-video overflow-hidden rounded-xl object-cover object-center"
-                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
+                src="/lovable-uploads/b9429ec9-eb27-42d2-ab5b-a8098a2403b2.png"
+                alt="Rankify Dashboard"
+                className="w-full h-auto"
               />
             </div>
           </div>
@@ -49,22 +62,20 @@ const Landing = () => {
       </section>
 
       {/* Features Section */}
-      <section className="w-full py-12 md:py-24 lg:py-32" id="features">
+      <section className="w-full py-12 md:py-24" id="features">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-                Transform Feedback into Growth
-              </h2>
-              <p className="max-w-[900px] text-muted md:text-xl">
-                Powerful tools to help you collect, manage, and leverage customer feedback
-              </p>
-            </div>
+            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+              Features designed for you
+            </h2>
+            <p className="max-w-[900px] text-muted md:text-xl">
+              Everything you need to manage your customer relationships effectively
+            </p>
           </div>
-          <div className="mx-auto grid max-w-5xl gap-6 py-12 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mx-auto grid max-w-5xl gap-6 py-12 md:grid-cols-3">
             <Card>
               <CardHeader>
-                <Star className="h-10 w-10 text-primary" />
+                <Shield className="h-12 w-12 text-[#8B5CF6]" />
                 <CardTitle>Review Collection</CardTitle>
                 <CardDescription>
                   Collect and showcase reviews from your customers effortlessly
@@ -73,7 +84,7 @@ const Landing = () => {
             </Card>
             <Card>
               <CardHeader>
-                <MessageSquare className="h-10 w-10 text-primary" />
+                <Zap className="h-12 w-12 text-[#8B5CF6]" />
                 <CardTitle>Smart Communication</CardTitle>
                 <CardDescription>
                   Engage your audience via Email, SMS, and WhatsApp
@@ -82,10 +93,10 @@ const Landing = () => {
             </Card>
             <Card>
               <CardHeader>
-                <Gift className="h-10 w-10 text-primary" />
-                <CardTitle>Loyalty Rewards</CardTitle>
+                <LineChart className="h-12 w-12 text-[#8B5CF6]" />
+                <CardTitle>Analytics Dashboard</CardTitle>
                 <CardDescription>
-                  Create a loyalty program that keeps them coming back
+                  Track your growth and customer satisfaction in real-time
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -94,24 +105,24 @@ const Landing = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="w-full border-t bg-accent py-12 md:py-24 lg:py-32">
+      <section className="w-full border-t bg-accent py-12 md:py-24">
         <div className="container px-4 md:px-6">
           <div className="grid gap-6 lg:grid-cols-3 lg:gap-12">
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
-                <div className="text-4xl font-bold">40%</div>
+                <div className="text-4xl font-bold text-[#8B5CF6]">40%</div>
                 <p className="text-muted">More repeat customers with loyalty rewards</p>
               </div>
             </div>
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
-                <div className="text-4xl font-bold">20%</div>
+                <div className="text-4xl font-bold text-[#8B5CF6]">20%</div>
                 <p className="text-muted">Increase in average customer ratings</p>
               </div>
             </div>
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
-                <div className="text-4xl font-bold">2x</div>
+                <div className="text-4xl font-bold text-[#8B5CF6]">2x</div>
                 <p className="text-muted">Faster review responses vs competitors</p>
               </div>
             </div>
@@ -120,7 +131,7 @@ const Landing = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="w-full py-12 md:py-24 lg:py-32" id="get-started">
+      <section className="w-full py-12 md:py-24" id="get-started">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
