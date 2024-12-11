@@ -3,35 +3,40 @@ import { toast } from "sonner";
 
 export const createTestUser = async () => {
   try {
-    // First check if the test user already exists
-    const { data: existingUser } = await supabase
-      .from('auth.users')
-      .select('id')
-      .eq('email', 'test@example.com')
-      .single();
+    // First create and sign in as the test user
+    const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+      email: 'test@example.com',
+      password: 'test123',
+    });
 
-    let userId;
+    if (signUpError) {
+      // If user already exists, try to sign in
+      if (signUpError.message.includes('already registered')) {
+        const { data: { user: existingUser }, error: signInError } = await supabase.auth.signInWithPassword({
+          email: 'test@example.com',
+          password: 'test123',
+        });
+        
+        if (signInError) throw signInError;
+        if (!existingUser) throw new Error('Failed to sign in as test user');
+        
+        // Call the create_test_data function with the user ID
+        const { error: testDataError } = await supabase
+          .rpc('create_test_data', { test_user_id: existingUser.id });
 
-    if (!existingUser) {
-      // Create the test user if it doesn't exist
-      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
-        email: 'test@example.com',
-        password: 'test123',
-      });
-
-      if (signUpError) throw signUpError;
+        if (testDataError) throw testDataError;
+      } else {
+        throw signUpError;
+      }
+    } else {
       if (!user) throw new Error('Failed to create test user');
       
-      userId = user.id;
-    } else {
-      userId = existingUser.id;
+      // Call the create_test_data function with the new user ID
+      const { error: testDataError } = await supabase
+        .rpc('create_test_data', { test_user_id: user.id });
+
+      if (testDataError) throw testDataError;
     }
-
-    // Call the create_test_data function with the user ID
-    const { error: testDataError } = await supabase
-      .rpc('create_test_data', { test_user_id: userId });
-
-    if (testDataError) throw testDataError;
 
     toast.success('Test data created successfully! You can now log in with test@example.com / test123');
     
