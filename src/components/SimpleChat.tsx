@@ -107,8 +107,8 @@ export const SimpleChat = () => {
           <AvatarFallback>AI</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
-          <h3 className="font-semibold">Restaurant Assistant</h3>
-          <p className="text-sm text-muted">Always here to help</p>
+          <h3 className="font-semibold">Local Business Assistant</h3>
+          <p className="text-sm text-muted">Always here to help manage your business</p>
         </div>
       </div>
 

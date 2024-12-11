@@ -38,12 +38,10 @@ serve(async (req) => {
       );
     }
 
-    // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch reviews for the restaurant
     const { data: reviews, error: reviewsError } = await supabase
       .from('reviews')
       .select('*')
@@ -61,7 +59,6 @@ serve(async (req) => {
       );
     }
 
-    // Store the user message
     const { error: messageError } = await supabase
       .from('messages')
       .insert([
@@ -78,7 +75,6 @@ serve(async (req) => {
 
     const openai = new OpenAI({ apiKey: openAIApiKey });
 
-    // Prepare review data for analysis
     const reviewStats = {
       totalReviews: reviews.length,
       averageRating: reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length,
@@ -86,8 +82,7 @@ serve(async (req) => {
       recentReviews: reviews.slice(0, 5)
     };
 
-    // Create a detailed prompt based on the user's question
-    let systemPrompt = `You are a helpful restaurant assistant analyzing reviews for a restaurant. Here are the current statistics:
+    let systemPrompt = `You are a helpful local business assistant analyzing reviews for a local business. Here are the current statistics:
     - Total Reviews: ${reviewStats.totalReviews}
     - Average Rating: ${reviewStats.averageRating.toFixed(1)}
     
@@ -96,7 +91,7 @@ serve(async (req) => {
       `- ${review.reviewer_name}: ${review.rating}★ - "${review.comment}"`
     ).join('\n')}
     
-    Please provide specific insights based on this data.`;
+    Please provide specific insights based on this data. Always refer to the business as a "local business" rather than a "restaurant".`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -116,7 +111,6 @@ serve(async (req) => {
 
     const response = completion.choices[0]?.message?.content || 'I apologize, but I was unable to analyze the reviews at this moment.';
     
-    // Store the assistant's response
     const { error: assistantMessageError } = await supabase
       .from('messages')
       .insert([

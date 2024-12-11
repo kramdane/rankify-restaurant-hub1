@@ -26,7 +26,7 @@ const DashboardContent = ({ children }: DashboardLayoutProps) => {
             <Menu className="h-6 w-6" />
           </Button>
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <h1 className="text-xl font-bold text-primary">Rankify</h1>
+            <h1 className="text-xl font-bold text-primary">Local Business Rankify</h1>
           </div>
           <div className="w-10" />
         </header>

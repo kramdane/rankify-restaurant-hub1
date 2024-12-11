@@ -98,7 +98,7 @@ const Dashboard = () => {
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Welcome back, {restaurant?.name || "Business Name"}
+            Welcome back to {restaurant?.name || "Your Local Business"}
           </h1>
           <p className="text-muted mt-2">
             Here's what's happening with your business
