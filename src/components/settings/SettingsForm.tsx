@@ -10,25 +10,9 @@ import { SocialMediaSection } from "./SocialMediaSection";
 import { settingsFormSchema, type SettingsFormValues } from "./settingsFormSchema";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
+import { SaveConfirmationDialog } from "./SaveConfirmationDialog";
+import { useNavigationGuard } from "@/hooks/useNavigationGuard";
 
 interface SettingsFormProps {
   userId: string;
@@ -37,11 +21,16 @@ interface SettingsFormProps {
 export function SettingsForm({ userId }: SettingsFormProps) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [pendingValues, setPendingValues] = useState<SettingsFormValues | null>(null);
-  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  
+  const {
+    showSaveDialog,
+    setShowSaveDialog,
+    pendingNavigation,
+    setPendingNavigation,
+    handleNavigation
+  } = useNavigationGuard(hasUnsavedChanges);
   
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsFormSchema),
@@ -78,11 +67,10 @@ export function SettingsForm({ userId }: SettingsFormProps) {
       return data;
     },
     enabled: !!userId,
-    staleTime: 30000, // Consider data fresh for 30 seconds
-    gcTime: 1000 * 60 * 5, // Keep data in cache for 5 minutes (formerly cacheTime)
+    staleTime: 30000,
+    gcTime: 1000 * 60 * 5,
   });
 
-  // Update form when data is loaded
   useEffect(() => {
     if (restaurantData) {
       console.log("Updating form with restaurant data:", restaurantData);
@@ -132,6 +120,11 @@ export function SettingsForm({ userId }: SettingsFormProps) {
       queryClient.invalidateQueries({ queryKey: ["restaurant", userId] });
       toast.success("Settings saved successfully");
       setShowSaveDialog(false);
+      setHasUnsavedChanges(false);
+      if (pendingNavigation) {
+        navigate(pendingNavigation);
+        setPendingNavigation(null);
+      }
     },
     onError: (error) => {
       console.error("Error saving settings:", error);
@@ -139,21 +132,6 @@ export function SettingsForm({ userId }: SettingsFormProps) {
       setShowSaveDialog(false);
     },
   });
-
-  useEffect(() => {
-    const unblock = navigate((nextLocation) => {
-      if (hasUnsavedChanges && location.pathname !== nextLocation.pathname) {
-        setPendingNavigation(nextLocation.pathname);
-        setShowSaveDialog(true);
-        return false;
-      }
-      return true;
-    });
-
-    return () => {
-      unblock();
-    };
-  }, [navigate, hasUnsavedChanges, location]);
 
   useEffect(() => {
     const subscription = form.watch(() => {
@@ -169,35 +147,13 @@ export function SettingsForm({ userId }: SettingsFormProps) {
 
   const handleConfirmSave = () => {
     if (pendingValues) {
-      mutation.mutate(pendingValues, {
-        onSuccess: () => {
-          setHasUnsavedChanges(false);
-          if (pendingNavigation) {
-            navigate(pendingNavigation);
-          }
-          setShowSaveDialog(false);
-          setPendingNavigation(null);
-          queryClient.invalidateQueries({ queryKey: ["restaurant", userId] });
-          toast.success("Settings saved successfully");
-        },
-        onError: (error) => {
-          console.error("Error saving settings:", error);
-          toast.error("Failed to save settings: " + error.message);
-          setShowSaveDialog(false);
-          setPendingNavigation(null);
-        },
-      });
+      mutation.mutate(pendingValues);
     }
   };
 
   const handleCancelSave = () => {
     setShowSaveDialog(false);
     setPendingValues(null);
-    if (pendingNavigation) {
-      setHasUnsavedChanges(false);
-      navigate(pendingNavigation);
-      setPendingNavigation(null);
-    }
   };
 
   const handleDiscardChanges = () => {
@@ -234,42 +190,15 @@ export function SettingsForm({ userId }: SettingsFormProps) {
         </form>
       </Form>
 
-      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Save Changes</DialogTitle>
-            <DialogDescription>
-              {pendingNavigation 
-                ? "You have unsaved changes. Would you like to save them before leaving?"
-                : "Are you sure you want to save these changes to your settings?"}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            {pendingNavigation ? (
-              <>
-                <Button variant="destructive" onClick={handleDiscardChanges}>
-                  Discard Changes
-                </Button>
-                <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleConfirmSave} disabled={mutation.isPending}>
-                  {mutation.isPending ? "Saving..." : "Save Changes"}
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" onClick={handleCancelSave}>
-                  Cancel
-                </Button>
-                <Button onClick={handleConfirmSave} disabled={mutation.isPending}>
-                  {mutation.isPending ? "Saving..." : "Save Changes"}
-                </Button>
-              </>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <SaveConfirmationDialog
+        open={showSaveDialog}
+        onOpenChange={setShowSaveDialog}
+        onConfirm={handleConfirmSave}
+        onDiscard={handleDiscardChanges}
+        onCancel={handleCancelSave}
+        isPending={mutation.isPending}
+        showDiscardOption={!!pendingNavigation}
+      />
     </>
   );
 }
