@@ -379,6 +379,12 @@ export type Database = {
       }
     }
     Functions: {
+      create_test_data: {
+        Args: {
+          test_user_id: string
+        }
+        Returns: undefined
+      }
       handle_chat: {
         Args: {
           message: string
