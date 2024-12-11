@@ -7,7 +7,7 @@ import { addDays } from "date-fns";
 
 const Reviews = () => {
   const [timeRange, setTimeRange] = useState({
-    start: addDays(new Date(), -30),
+    start: addDays(new Date(), -7),
     end: new Date(),
   });
 

@@ -1,5 +1,4 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
 import { addDays, startOfDay, endOfDay, startOfMonth, subMonths, subYears } from "date-fns";
 
 export type TimeRange = {
@@ -8,10 +7,25 @@ export type TimeRange = {
 };
 
 interface TimeRangeSelectProps {
+  value: TimeRange;
   onChange: (range: TimeRange) => void;
 }
 
-export const TimeRangeSelect = ({ onChange }: TimeRangeSelectProps) => {
+export const TimeRangeSelect = ({ value, onChange }: TimeRangeSelectProps) => {
+  const getSelectedValue = (range: TimeRange) => {
+    const now = new Date();
+    const today = startOfDay(now);
+    const yesterday = startOfDay(addDays(now, -1));
+    
+    if (range.start.getTime() === today.getTime()) return "today";
+    if (range.start.getTime() === yesterday.getTime()) return "yesterday";
+    if (range.start.getTime() === startOfDay(addDays(now, -7)).getTime()) return "last7days";
+    if (range.start.getTime() === startOfMonth(now).getTime()) return "thisMonth";
+    if (range.start.getTime() === startOfDay(subMonths(now, 6)).getTime()) return "last6months";
+    if (range.start.getTime() === startOfDay(subYears(now, 1)).getTime()) return "lastYear";
+    return "last7days";
+  };
+
   const handleRangeChange = (value: string) => {
     const now = new Date();
     let end = endOfDay(now);
@@ -48,7 +62,7 @@ export const TimeRangeSelect = ({ onChange }: TimeRangeSelectProps) => {
 
   return (
     <div className="flex items-center gap-4">
-      <Select onValueChange={handleRangeChange} defaultValue="last7days">
+      <Select onValueChange={handleRangeChange} value={getSelectedValue(value)}>
         <SelectTrigger className="w-[180px] bg-white">
           <SelectValue placeholder="Select time range" />
         </SelectTrigger>
