@@ -10,6 +10,7 @@ import { SocialMediaSection } from "./SocialMediaSection";
 import { settingsFormSchema, type SettingsFormValues } from "./settingsFormSchema";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +21,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface SettingsFormProps {
   userId: string;
@@ -27,8 +36,12 @@ interface SettingsFormProps {
 
 export function SettingsForm({ userId }: SettingsFormProps) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [pendingValues, setPendingValues] = useState<SettingsFormValues | null>(null);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsFormSchema),
@@ -127,13 +140,27 @@ export function SettingsForm({ userId }: SettingsFormProps) {
     },
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <LoadingSpinner />
-      </div>
-    );
-  }
+  useEffect(() => {
+    const unblock = navigate((nextLocation) => {
+      if (hasUnsavedChanges && location.pathname !== nextLocation.pathname) {
+        setPendingNavigation(nextLocation.pathname);
+        setShowSaveDialog(true);
+        return false;
+      }
+      return true;
+    });
+
+    return () => {
+      unblock();
+    };
+  }, [navigate, hasUnsavedChanges, location]);
+
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      setHasUnsavedChanges(true);
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   const onSubmit = (values: SettingsFormValues) => {
     setPendingValues(values);
@@ -142,14 +169,54 @@ export function SettingsForm({ userId }: SettingsFormProps) {
 
   const handleConfirmSave = () => {
     if (pendingValues) {
-      mutation.mutate(pendingValues);
+      mutation.mutate(pendingValues, {
+        onSuccess: () => {
+          setHasUnsavedChanges(false);
+          if (pendingNavigation) {
+            navigate(pendingNavigation);
+          }
+          setShowSaveDialog(false);
+          setPendingNavigation(null);
+          queryClient.invalidateQueries({ queryKey: ["restaurant", userId] });
+          toast.success("Settings saved successfully");
+        },
+        onError: (error) => {
+          console.error("Error saving settings:", error);
+          toast.error("Failed to save settings: " + error.message);
+          setShowSaveDialog(false);
+          setPendingNavigation(null);
+        },
+      });
     }
   };
 
   const handleCancelSave = () => {
     setShowSaveDialog(false);
     setPendingValues(null);
+    if (pendingNavigation) {
+      setHasUnsavedChanges(false);
+      navigate(pendingNavigation);
+      setPendingNavigation(null);
+    }
   };
+
+  const handleDiscardChanges = () => {
+    if (pendingNavigation) {
+      setHasUnsavedChanges(false);
+      navigate(pendingNavigation);
+      setPendingNavigation(null);
+    }
+    setShowSaveDialog(false);
+    setPendingValues(null);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -167,20 +234,42 @@ export function SettingsForm({ userId }: SettingsFormProps) {
         </form>
       </Form>
 
-      <AlertDialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
-        <AlertDialogContent className="max-w-[400px]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Save Changes</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to save these changes to your settings?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelSave}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmSave}>Save Changes</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Save Changes</DialogTitle>
+            <DialogDescription>
+              {pendingNavigation 
+                ? "You have unsaved changes. Would you like to save them before leaving?"
+                : "Are you sure you want to save these changes to your settings?"}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            {pendingNavigation ? (
+              <>
+                <Button variant="destructive" onClick={handleDiscardChanges}>
+                  Discard Changes
+                </Button>
+                <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleConfirmSave} disabled={mutation.isPending}>
+                  {mutation.isPending ? "Saving..." : "Save Changes"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={handleCancelSave}>
+                  Cancel
+                </Button>
+                <Button onClick={handleConfirmSave} disabled={mutation.isPending}>
+                  {mutation.isPending ? "Saving..." : "Save Changes"}
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
