@@ -40,7 +40,7 @@ export const PricingSection = () => {
                 <li>✅ Advanced analytics</li>
                 <li>✅ Priority support</li>
                 <li>✅ Unlimited campaigns</li>
-                <li>✅ Access to Rankify Community</li>
+                <li>✅ Access to Avify Community</li>
               </ul>
             </CardContent>
           </Card>
