@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { createTestUser } from "@/utils/createTestUser";
 import { toast } from "sonner";
 
 const Login = () => {
@@ -23,11 +22,6 @@ const Login = () => {
       console.error('Login error:', error);
       toast.error(error.message || 'Failed to sign in');
     }
-  };
-
-  const handleCreateTestUser = async () => {
-    await createTestUser();
-    toast.success('Test user created! You can now login with test@example.com / test123');
   };
 
   return (
@@ -72,14 +66,6 @@ const Login = () => {
               onClick={() => navigate('/register')}
             >
               Don't have an account? Sign up
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              className="w-full"
-              onClick={handleCreateTestUser}
-            >
-              Create Test Account
             </Button>
           </CardFooter>
         </form>
