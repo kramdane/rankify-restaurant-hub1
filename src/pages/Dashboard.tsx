@@ -6,8 +6,6 @@ import { StatsCards } from "@/components/dashboard/StatsCards";
 import { AnalyticsSection } from "@/components/dashboard/AnalyticsSection";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
-import { createTestUser } from "@/utils/createTestUser";
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>({
@@ -96,18 +94,13 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              Welcome back, {restaurant?.name || "Business Name"}
-            </h1>
-            <p className="text-muted mt-2">
-              Here's what's happening with your business
-            </p>
-          </div>
-          <Button onClick={createTestUser} variant="outline">
-            Create Test Data
-          </Button>
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">
+            Welcome back, {restaurant?.name || "Business Name"}
+          </h1>
+          <p className="text-muted mt-2">
+            Here's what's happening with your business
+          </p>
         </div>
 
         <TimeRangeSelect onChange={setTimeRange} />
