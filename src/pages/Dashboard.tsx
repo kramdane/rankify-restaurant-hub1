@@ -1,14 +1,13 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SimpleChat } from "@/components/SimpleChat";
-import { WordWall } from "@/components/WordWall";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
 import { TimeRangeSelect, TimeRange } from "@/components/TimeRangeSelect";
 import { useState } from "react";
 import { addDays, startOfDay, endOfDay } from "date-fns";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { AnalyticsSection } from "@/components/dashboard/AnalyticsSection";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { createTestUser } from "@/utils/createTestUser";
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>({
@@ -97,13 +96,18 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">
-            Welcome back, {restaurant?.name || "Business Name"}
-          </h1>
-          <p className="text-muted mt-2">
-            Here's what's happening with your business
-          </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">
+              Welcome back, {restaurant?.name || "Business Name"}
+            </h1>
+            <p className="text-muted mt-2">
+              Here's what's happening with your business
+            </p>
+          </div>
+          <Button onClick={createTestUser} variant="outline">
+            Create Test Data
+          </Button>
         </div>
 
         <TimeRangeSelect onChange={setTimeRange} />
@@ -116,18 +120,6 @@ const Dashboard = () => {
         />
 
         <AnalyticsSection timeRange={timeRange} restaurantId={restaurant?.id} />
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Review Analysis</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <WordWall restaurantId={restaurant?.id} />
-          </CardContent>
-        </Card>
-      </div>
-      <div className="fixed bottom-4 right-4">
-        <SimpleChat />
       </div>
     </DashboardLayout>
   );

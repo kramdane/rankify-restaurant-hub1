@@ -1,48 +1,42 @@
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 export const createTestUser = async () => {
   try {
-    // First, check if the test user already exists
+    // First check if the test user already exists
     const { data: existingUser } = await supabase
-      .from('restaurants')
-      .select('user_id')
+      .from('auth.users')
+      .select('id')
       .eq('email', 'test@example.com')
       .single();
 
-    if (existingUser) {
-      console.log('Test user already exists');
-      return;
-    }
+    let userId;
 
-    // Create the test user in auth
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email: 'test@example.com',
-      password: 'test123',
-    });
-
-    if (signUpError) {
-      console.error('Error creating test user:', signUpError.message);
-      return;
-    }
-
-    if (!authData.user?.id) {
-      console.error('No user ID returned from signup');
-      return;
-    }
-
-    // Call the database function to create test data
-    const { error: dbError } = await supabase
-      .rpc('create_test_data', {
-        test_user_id: authData.user.id
+    if (!existingUser) {
+      // Create the test user if it doesn't exist
+      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+        email: 'test@example.com',
+        password: 'test123',
       });
 
-    if (dbError) {
-      console.error('Error creating test data:', dbError.message);
-      return;
+      if (signUpError) throw signUpError;
+      if (!user) throw new Error('Failed to create test user');
+      
+      userId = user.id;
+    } else {
+      userId = existingUser.id;
     }
 
-    console.log('Test user and data created successfully');
-  } catch (error) {
-    console.error('Error:', error);
+    // Call the create_test_data function with the user ID
+    const { error: testDataError } = await supabase
+      .rpc('create_test_data', { test_user_id: userId });
+
+    if (testDataError) throw testDataError;
+
+    toast.success('Test data created successfully! You can now log in with test@example.com / test123');
+    
+  } catch (error: any) {
+    console.error('Error creating test data:', error);
+    toast.error(error.message || 'Failed to create test data');
   }
 };
