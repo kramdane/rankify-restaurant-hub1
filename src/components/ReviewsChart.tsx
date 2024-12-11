@@ -97,23 +97,37 @@ export const ReviewsChart = ({ timeRange, restaurantId }: ReviewsChartProps) => 
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={dailyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+        <BarChart 
+          data={dailyData} 
+          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          className="[&_.recharts-bar-rectangle]:transition-all [&_.recharts-bar-rectangle]:duration-300"
+        >
+          <CartesianGrid 
+            strokeDasharray="0" 
+            vertical={false}
+            stroke="hsl(var(--border))"
+            opacity={0.2}
+          />
           <XAxis 
             dataKey="date"
             className="text-xs"
             tick={{ fill: 'hsl(var(--muted-foreground))' }}
+            axisLine={{ stroke: 'hsl(var(--border))', opacity: 0.2 }}
+            tickLine={false}
           />
           <YAxis 
             allowDecimals={false}
             className="text-xs"
             tick={{ fill: 'hsl(var(--muted-foreground))' }}
+            axisLine={{ stroke: 'hsl(var(--border))', opacity: 0.2 }}
+            tickLine={false}
           />
           <Tooltip content={<CustomTooltip />} />
           <Bar 
             dataKey="total" 
             fill="hsl(var(--primary))"
             radius={[4, 4, 0, 0]}
+            className="animate-[slideUp_0.4s_ease-out]"
           />
         </BarChart>
       </ResponsiveContainer>
