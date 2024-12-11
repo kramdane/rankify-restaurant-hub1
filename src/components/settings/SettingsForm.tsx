@@ -9,6 +9,7 @@ import { BusinessInformationSection } from "./BusinessInformationSection";
 import { SocialMediaSection } from "./SocialMediaSection";
 import { settingsFormSchema, type SettingsFormValues } from "./settingsFormSchema";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { useEffect } from "react";
 
 interface SettingsFormProps {
   userId: string;
@@ -53,11 +54,11 @@ export function SettingsForm({ userId }: SettingsFormProps) {
     },
     enabled: !!userId,
     staleTime: 30000, // Consider data fresh for 30 seconds
-    cacheTime: 1000 * 60 * 5, // Keep data in cache for 5 minutes
+    gcTime: 1000 * 60 * 5, // Keep data in cache for 5 minutes (formerly cacheTime)
   });
 
   // Update form when data is loaded
-  React.useEffect(() => {
+  useEffect(() => {
     if (restaurantData) {
       console.log("Updating form with restaurant data:", restaurantData);
       form.reset({
