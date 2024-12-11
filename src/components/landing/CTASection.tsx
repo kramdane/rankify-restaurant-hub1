@@ -12,7 +12,7 @@ export const CTASection = () => {
               Ready to Make Every Customer Your Biggest Fan? 🌟
             </h2>
             <p className="max-w-[600px] text-muted md:text-xl">
-              Join thousands of businesses already growing with Rankify
+              Join thousands of businesses already growing with Avify
             </p>
           </div>
           <div className="flex gap-4">

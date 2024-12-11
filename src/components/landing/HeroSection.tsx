@@ -13,7 +13,7 @@ export const HeroSection = () => {
               <span className="block text-[#8B5CF6]">When Was the Last Time You Asked for Their Opinion?</span>
             </h1>
             <p className="max-w-[600px] mx-auto text-muted text-lg md:text-xl">
-              Rankify helps local businesses collect reviews, engage customers, and build loyalty effortlessly.
+              Avify helps local businesses collect reviews, engage customers, and build loyalty effortlessly.
             </p>
           </div>
           <div className="flex gap-4">

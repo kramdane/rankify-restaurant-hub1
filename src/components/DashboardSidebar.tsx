@@ -47,7 +47,7 @@ export function DashboardSidebar() {
       <SidebarContent className="bg-accent">
         <div className="p-6">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Rankify
+            Avify
           </h1>
         </div>
         <SidebarGroup>
