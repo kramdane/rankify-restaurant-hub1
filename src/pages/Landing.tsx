@@ -28,7 +28,7 @@ const Landing = () => {
                 Rankify helps local businesses collect reviews, engage customers, and build loyalty effortlessly.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4 min-[400px]:flex-row">
+            <div className="flex gap-4">
               <Link to="/register">
                 <Button size="lg" className="gap-2">
                   Get Started for Free
@@ -66,7 +66,7 @@ const Landing = () => {
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-              Features designed for you
+              Features designed for you 🚀
             </h2>
             <p className="max-w-[900px] text-muted md:text-xl">
               Everything you need to manage your customer relationships effectively
@@ -76,7 +76,7 @@ const Landing = () => {
             <Card>
               <CardHeader>
                 <Shield className="h-12 w-12 text-[#8B5CF6]" />
-                <CardTitle>Review Collection</CardTitle>
+                <CardTitle>Review Collection 📝</CardTitle>
                 <CardDescription>
                   Collect and showcase reviews from your customers effortlessly
                 </CardDescription>
@@ -85,7 +85,7 @@ const Landing = () => {
             <Card>
               <CardHeader>
                 <Zap className="h-12 w-12 text-[#8B5CF6]" />
-                <CardTitle>Smart Communication</CardTitle>
+                <CardTitle>Smart Communication 💬</CardTitle>
                 <CardDescription>
                   Engage your audience via Email, SMS, and WhatsApp
                 </CardDescription>
@@ -94,12 +94,49 @@ const Landing = () => {
             <Card>
               <CardHeader>
                 <LineChart className="h-12 w-12 text-[#8B5CF6]" />
-                <CardTitle>Analytics Dashboard</CardTitle>
+                <CardTitle>Analytics Dashboard 📊</CardTitle>
                 <CardDescription>
                   Track your growth and customer satisfaction in real-time
                 </CardDescription>
               </CardHeader>
             </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="w-full py-12 md:py-24 bg-accent" id="how-it-works">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+              How It Works 🎯
+            </h2>
+            <p className="max-w-[900px] text-muted md:text-xl">
+              Three simple steps to transform your customer relationships
+            </p>
+          </div>
+          <div className="mx-auto grid max-w-5xl gap-6 py-12 md:grid-cols-3">
+            <div className="flex flex-col items-center space-y-4 text-center">
+              <div className="rounded-full bg-[#8B5CF6] p-4">
+                <span className="text-2xl text-white">1</span>
+              </div>
+              <h3 className="text-xl font-bold">Sign Up in Minutes ⚡</h3>
+              <p className="text-muted">Set up your profile and link your business</p>
+            </div>
+            <div className="flex flex-col items-center space-y-4 text-center">
+              <div className="rounded-full bg-[#8B5CF6] p-4">
+                <span className="text-2xl text-white">2</span>
+              </div>
+              <h3 className="text-xl font-bold">Engage Customers 🤝</h3>
+              <p className="text-muted">Collect reviews and send offers easily</p>
+            </div>
+            <div className="flex flex-col items-center space-y-4 text-center">
+              <div className="rounded-full bg-[#8B5CF6] p-4">
+                <span className="text-2xl text-white">3</span>
+              </div>
+              <h3 className="text-xl font-bold">Grow Your Business 📈</h3>
+              <p className="text-muted">Watch your reviews, loyalty, and sales soar</p>
+            </div>
           </div>
         </div>
       </section>
@@ -110,22 +147,82 @@ const Landing = () => {
           <div className="grid gap-6 lg:grid-cols-3 lg:gap-12">
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
-                <div className="text-4xl font-bold text-[#8B5CF6]">40%</div>
+                <div className="text-4xl font-bold text-[#8B5CF6]">40% 📈</div>
                 <p className="text-muted">More repeat customers with loyalty rewards</p>
               </div>
             </div>
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
-                <div className="text-4xl font-bold text-[#8B5CF6]">20%</div>
+                <div className="text-4xl font-bold text-[#8B5CF6]">20% ⭐</div>
                 <p className="text-muted">Increase in average customer ratings</p>
               </div>
             </div>
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
-                <div className="text-4xl font-bold text-[#8B5CF6]">2x</div>
+                <div className="text-4xl font-bold text-[#8B5CF6]">2x 🚀</div>
                 <p className="text-muted">Faster review responses vs competitors</p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="w-full py-12 md:py-24" id="pricing">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+              Simple, Transparent Pricing 💰
+            </h2>
+            <p className="max-w-[900px] text-muted md:text-xl">
+              Choose the plan that's right for your business
+            </p>
+          </div>
+          <div className="mx-auto grid max-w-5xl gap-6 py-12 md:grid-cols-3">
+            <Card>
+              <CardHeader>
+                <CardTitle>Starter</CardTitle>
+                <div className="text-3xl font-bold">$29/mo</div>
+                <CardDescription>Perfect for small businesses</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-left">
+                  <li>✅ Up to 100 reviews/month</li>
+                  <li>✅ Basic analytics</li>
+                  <li>✅ Email support</li>
+                </ul>
+              </CardContent>
+            </Card>
+            <Card className="border-[#8B5CF6]">
+              <CardHeader>
+                <CardTitle>Pro</CardTitle>
+                <div className="text-3xl font-bold">$99/mo</div>
+                <CardDescription>For growing businesses</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-left">
+                  <li>✅ Unlimited reviews</li>
+                  <li>✅ Advanced analytics</li>
+                  <li>✅ Priority support</li>
+                  <li>✅ Custom branding</li>
+                </ul>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Enterprise</CardTitle>
+                <div className="text-3xl font-bold">Custom</div>
+                <CardDescription>For large organizations</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-left">
+                  <li>✅ All Pro features</li>
+                  <li>✅ Custom integration</li>
+                  <li>✅ Dedicated support</li>
+                  <li>✅ SLA guarantee</li>
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -136,13 +233,13 @@ const Landing = () => {
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-                Ready to Make Every Customer Your Biggest Fan?
+                Ready to Make Every Customer Your Biggest Fan? 🌟
               </h2>
               <p className="max-w-[600px] text-muted md:text-xl">
                 Join thousands of businesses already growing with Rankify
               </p>
             </div>
-            <div className="flex flex-col gap-2 min-[400px]:flex-row">
+            <div className="flex gap-4">
               <Link to="/register">
                 <Button size="lg" className="gap-2">
                   Sign Up for Free Today
