@@ -14,11 +14,30 @@ export const createTestUser = async () => {
     if (signInError) throw signInError;
     if (!user) throw new Error('Failed to sign in as test user');
     
-    // Call the create_test_data function with the specific test user ID
-    const { error: testDataError } = await supabase
-      .rpc('create_test_data', { test_user_id: TEST_USER_ID });
+    // Check if restaurant already exists for this user
+    const { data: existingRestaurant, error: checkError } = await supabase
+      .from('restaurants')
+      .select('id')
+      .eq('user_id', TEST_USER_ID)
+      .single();
 
-    if (testDataError) throw testDataError;
+    if (checkError && checkError.code !== 'PGRST116') {
+      throw checkError;
+    }
+
+    if (existingRestaurant) {
+      // If restaurant exists, just create new reviews
+      const { error: testDataError } = await supabase
+        .rpc('create_test_data', { test_user_id: TEST_USER_ID });
+
+      if (testDataError) throw testDataError;
+    } else {
+      // If no restaurant exists, create everything
+      const { error: testDataError } = await supabase
+        .rpc('create_test_data', { test_user_id: TEST_USER_ID });
+
+      if (testDataError) throw testDataError;
+    }
 
     toast.success('Test data created successfully! You can now log in with test@example.com / test123');
     
