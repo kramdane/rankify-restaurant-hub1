@@ -33,7 +33,7 @@ export function SettingsForm({ userId }: SettingsFormProps) {
     },
   });
 
-  const { isLoading } = useQuery({
+  const { isLoading, data: restaurantData } = useQuery({
     queryKey: ["restaurant", userId],
     queryFn: async () => {
       console.log("Fetching restaurant data for user:", userId);
@@ -49,27 +49,31 @@ export function SettingsForm({ userId }: SettingsFormProps) {
       }
       
       console.log("Fetched restaurant data:", data);
-      
-      if (data) {
-        // Update form with the fetched data, handling null values
-        form.reset({
-          name: data.name || "",
-          owner_name: data.owner_name || "",
-          phone: data.phone || "",
-          email: data.email || "",
-          address: data.address || "",
-          business_category: data.business_category || "",
-          facebook_url: data.facebook_url || "",
-          google_business_url: data.google_business_url || "",
-          tripadvisor_url: data.tripadvisor_url || "",
-          preferred_social_media: data.preferred_social_media || "google",
-        });
-      }
-      
       return data;
     },
     enabled: !!userId,
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    cacheTime: 1000 * 60 * 5, // Keep data in cache for 5 minutes
   });
+
+  // Update form when data is loaded
+  React.useEffect(() => {
+    if (restaurantData) {
+      console.log("Updating form with restaurant data:", restaurantData);
+      form.reset({
+        name: restaurantData.name || "",
+        owner_name: restaurantData.owner_name || "",
+        phone: restaurantData.phone || "",
+        email: restaurantData.email || "",
+        address: restaurantData.address || "",
+        business_category: restaurantData.business_category || "",
+        facebook_url: restaurantData.facebook_url || "",
+        google_business_url: restaurantData.google_business_url || "",
+        tripadvisor_url: restaurantData.tripadvisor_url || "",
+        preferred_social_media: restaurantData.preferred_social_media || "google",
+      });
+    }
+  }, [restaurantData, form]);
 
   const mutation = useMutation({
     mutationFn: async (values: SettingsFormValues) => {
