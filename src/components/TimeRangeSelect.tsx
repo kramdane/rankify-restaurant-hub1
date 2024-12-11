@@ -13,6 +13,8 @@ interface TimeRangeSelectProps {
 
 export const TimeRangeSelect = ({ value, onChange }: TimeRangeSelectProps) => {
   const getSelectedValue = (range: TimeRange) => {
+    if (!range) return "last7days";
+    
     const now = new Date();
     const today = startOfDay(now);
     const yesterday = startOfDay(addDays(now, -1));

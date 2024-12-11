@@ -105,7 +105,7 @@ const Dashboard = () => {
           </p>
         </div>
 
-        <TimeRangeSelect onChange={setTimeRange} />
+        <TimeRangeSelect value={timeRange} onChange={setTimeRange} />
 
         <StatsCards
           totalReviews={totalReviews}
