@@ -9,7 +9,17 @@ import { BusinessInformationSection } from "./BusinessInformationSection";
 import { SocialMediaSection } from "./SocialMediaSection";
 import { settingsFormSchema, type SettingsFormValues } from "./settingsFormSchema";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SettingsFormProps {
   userId: string;
@@ -17,6 +27,8 @@ interface SettingsFormProps {
 
 export function SettingsForm({ userId }: SettingsFormProps) {
   const queryClient = useQueryClient();
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [pendingValues, setPendingValues] = useState<SettingsFormValues | null>(null);
   
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsFormSchema),
@@ -106,10 +118,12 @@ export function SettingsForm({ userId }: SettingsFormProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["restaurant", userId] });
       toast.success("Settings saved successfully");
+      setShowSaveDialog(false);
     },
     onError: (error) => {
       console.error("Error saving settings:", error);
       toast.error("Failed to save settings: " + error.message);
+      setShowSaveDialog(false);
     },
   });
 
@@ -122,22 +136,51 @@ export function SettingsForm({ userId }: SettingsFormProps) {
   }
 
   const onSubmit = (values: SettingsFormValues) => {
-    mutation.mutate(values);
+    setPendingValues(values);
+    setShowSaveDialog(true);
+  };
+
+  const handleConfirmSave = () => {
+    if (pendingValues) {
+      mutation.mutate(pendingValues);
+    }
+  };
+
+  const handleCancelSave = () => {
+    setShowSaveDialog(false);
+    setPendingValues(null);
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <BusinessInformationSection form={form} />
-        <SocialMediaSection form={form} />
-        <Button 
-          type="submit" 
-          className="w-full bg-primary hover:bg-primary/90"
-          disabled={mutation.isPending}
-        >
-          {mutation.isPending ? "Saving..." : "Save Changes"}
-        </Button>
-      </form>
-    </Form>
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <BusinessInformationSection form={form} />
+          <SocialMediaSection form={form} />
+          <Button 
+            type="submit" 
+            className="w-full bg-primary hover:bg-primary/90"
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? "Saving..." : "Save Changes"}
+          </Button>
+        </form>
+      </Form>
+
+      <AlertDialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <AlertDialogContent className="max-w-[400px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Save Changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to save these changes to your settings?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelSave}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSave}>Save Changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
