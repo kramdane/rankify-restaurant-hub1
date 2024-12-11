@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { TimeRange } from "@/components/TimeRangeSelect";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { format, eachDayOfInterval } from "date-fns";
 
@@ -97,39 +97,47 @@ export const ReviewsChart = ({ timeRange, restaurantId }: ReviewsChartProps) => 
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart 
+        <AreaChart 
           data={dailyData} 
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-          className="[&_.recharts-bar-rectangle]:transition-all [&_.recharts-bar-rectangle]:duration-300"
+          className="animate-[slideUp_0.4s_ease-out]"
         >
+          <defs>
+            <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.1}/>
+              <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+            </linearGradient>
+          </defs>
           <CartesianGrid 
             strokeDasharray="0" 
             vertical={false}
             stroke="hsl(var(--border))"
-            opacity={0.2}
+            opacity={0.1}
           />
           <XAxis 
             dataKey="date"
             className="text-xs"
             tick={{ fill: 'hsl(var(--muted-foreground))' }}
-            axisLine={{ stroke: 'hsl(var(--border))', opacity: 0.2 }}
+            axisLine={{ stroke: 'hsl(var(--border))', opacity: 0.1 }}
             tickLine={false}
           />
           <YAxis 
             allowDecimals={false}
             className="text-xs"
             tick={{ fill: 'hsl(var(--muted-foreground))' }}
-            axisLine={{ stroke: 'hsl(var(--border))', opacity: 0.2 }}
+            axisLine={{ stroke: 'hsl(var(--border))', opacity: 0.1 }}
             tickLine={false}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Bar 
-            dataKey="total" 
-            fill="hsl(var(--primary))"
-            radius={[4, 4, 0, 0]}
-            className="animate-[slideUp_0.4s_ease-out]"
+          <Area 
+            type="monotone"
+            dataKey="total"
+            stroke="hsl(var(--primary))"
+            strokeWidth={2}
+            fill="url(#colorTotal)"
+            className="transition-all duration-300"
           />
-        </BarChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );
