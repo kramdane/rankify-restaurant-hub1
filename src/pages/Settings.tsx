@@ -31,16 +31,16 @@ export default function Settings() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6">
+      <div className="p-4 md:p-6 space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-          <p className="text-muted mt-2">Manage your restaurant profile and preferences</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Settings</h1>
+          <p className="text-muted mt-2">Manage your local business profile and preferences</p>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <Card className="bg-white shadow-sm">
-              <CardContent className="p-6">
+              <CardContent className="p-4 md:p-6">
                 <SettingsForm userId={user.id} />
               </CardContent>
             </Card>
@@ -48,7 +48,7 @@ export default function Settings() {
           
           <div className="lg:col-span-1">
             <Card className="bg-white shadow-sm">
-              <CardContent className="p-6">
+              <CardContent className="p-4 md:p-6">
                 <PasswordChangeSection />
               </CardContent>
             </Card>

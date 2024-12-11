@@ -50,31 +50,31 @@ const PublicMenu = () => {
   }, {});
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground">{restaurant?.name}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{restaurant?.name}</h1>
           {restaurant?.description && (
             <p className="text-muted mt-2">{restaurant.description}</p>
           )}
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-6">
           {Object.entries(groupedMenuItems).map(([category, items]) => (
             <Card key={category} className="bg-white shadow-sm">
-              <CardHeader>
+              <CardHeader className="p-4 md:p-6">
                 <CardTitle>{category}</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
+              <CardContent className="p-4 md:p-6">
+                <div className="space-y-4">
                   {items.map((item) => (
                     <div key={item.id} className="flex justify-between items-start border-b pb-4 last:border-0">
-                      <div className="space-y-1 flex-1">
-                        <div className="flex justify-between">
+                      <div className="space-y-1 flex-1 pr-4">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-2">
                           <h3 className="text-lg font-semibold">{item.name}</h3>
-                          <span className="font-semibold">${item.price.toFixed(2)}</span>
+                          <span className="font-semibold whitespace-nowrap">${item.price.toFixed(2)}</span>
                         </div>
-                        <p className="text-muted-foreground text-sm" style={{ fontSize: "0.8em" }}>
+                        <p className="text-muted-foreground text-sm">
                           {item.description}
                         </p>
                       </div>

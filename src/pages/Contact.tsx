@@ -138,27 +138,31 @@ const ContactPage = () => {
 
   return (
     <DashboardLayout>
-      <Card>
-        <CardHeader>
-          <CardTitle>Contact List</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ContactList
-            contacts={contacts || []}
-            onContactSelect={setSelectedContact}
-            selectedContactReviews={selectedContactReviews}
-            calculateAverageRating={calculateAverageRating}
-            handleExportCSV={handleExportCSV}
-          />
-        </CardContent>
-      </Card>
+      <div className="px-4 md:px-6 space-y-6">
+        <Card className="overflow-hidden">
+          <CardHeader className="px-4 md:px-6">
+            <CardTitle>Contact List</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0 md:p-6">
+            <div className="overflow-x-auto">
+              <ContactList
+                contacts={contacts || []}
+                onContactSelect={setSelectedContact}
+                selectedContactReviews={selectedContactReviews}
+                calculateAverageRating={calculateAverageRating}
+                handleExportCSV={handleExportCSV}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-      <ContactReviewDialog
-        selectedContact={selectedContact}
-        selectedContactReviews={selectedContactReviews || []}
-        calculateAverageRating={calculateAverageRating}
-        onOpenChange={(open) => !open && setSelectedContact(null)}
-      />
+        <ContactReviewDialog
+          selectedContact={selectedContact}
+          selectedContactReviews={selectedContactReviews || []}
+          calculateAverageRating={calculateAverageRating}
+          onOpenChange={(open) => !open && setSelectedContact(null)}
+        />
+      </div>
     </DashboardLayout>
   );
 };

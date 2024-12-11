@@ -1,6 +1,5 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { MenuForm } from "@/components/MenuForm";
@@ -94,19 +93,21 @@ const Menu = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-foreground">Menu Management</h1>
-          <Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
+      <div className="space-y-6 px-4 md:px-0">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Menu Management</h1>
+          <Button onClick={() => setShowForm(true)} className="w-full sm:w-auto flex items-center gap-2">
             <Plus className="h-4 w-4" /> Add Menu Item
           </Button>
         </div>
 
         {showForm && (
-          <MenuForm 
-            onSubmit={handleAddItem} 
-            onCancel={() => setShowForm(false)} 
-          />
+          <div className="w-full">
+            <MenuForm 
+              onSubmit={handleAddItem} 
+              onCancel={() => setShowForm(false)} 
+            />
+          </div>
         )}
 
         <div className="space-y-8">
